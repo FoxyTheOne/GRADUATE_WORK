@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/content_nav_graph"
+    app:startDestination="@id/homeRadioFragment">
+
+    <fragment
+        android:id="@+id/homeRadioFragment"
+        android:name="com.myproject.radiojourney.presentation.content.homeRadio.HomeRadioFragment"
+        android:label="HomeRadioFragment" >
+        <action
+            android:id="@+id/action_homeRadioFragment_to_auth_nav_graph"
+            app:destination="@id/auth_nav_graph"
+            app:popUpToInclusive="true" />
+    </fragment>
+</navigation>
