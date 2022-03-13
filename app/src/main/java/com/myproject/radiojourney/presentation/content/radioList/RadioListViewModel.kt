@@ -1,32 +1,30 @@
-package com.myproject.radiojourney.presentation.content.homeRadio
+package com.myproject.radiojourney.presentation.content.radioList
 
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.myproject.radiojourney.domain.homeRadio.IHomeRadioInteractor
 import com.myproject.radiojourney.domain.logOut.ILogOutInteractor
+import com.myproject.radiojourney.domain.radioList.IRadioListInteractor
 import com.myproject.radiojourney.extension.call
+import com.myproject.radiojourney.model.presentation.RadioStationPresentation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.IOException
 import javax.inject.Inject
 
-/**
- * ViewModel. Здесь осуществляется подписка, запрос через корутины. Работает с Interactor
- */
 @HiltViewModel
-class HomeRadioViewModel @Inject constructor(
+class RadioListViewModel @Inject constructor(
     private val logOutInteractor: ILogOutInteractor,
-    private val homeRadioInteractor: IHomeRadioInteractor
+    private val radioListInteractor: IRadioListInteractor
 ) : ViewModel() {
     companion object {
-        private const val TAG = "HomeRadioViewModel"
+        private const val TAG = "RadioListViewModel"
     }
 
-    // Подписка на локальную БД
-    val countryListFlow = homeRadioInteractor.subscribeOnCountryList()
+    // Получение списка радиостанций
+    val radioStationListLiveData = MutableLiveData<List<RadioStationPresentation>>()
 
     // LiveData, которые будут отвечать за отображение прогресса (кружок)
     val showProgressLiveData = MutableLiveData<Boolean>()
@@ -43,10 +41,12 @@ class HomeRadioViewModel @Inject constructor(
         }
     }
 
-    fun getCountryListAndSaveToRoom() {
+    fun getRadioStationList(countryCode: String) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                homeRadioInteractor.getCountryListAndSaveToRoom()
+                val radioStationPresentation: List<RadioStationPresentation> =
+                    radioListInteractor.getRadioStationList(countryCode)
+                radioStationListLiveData.postValue(radioStationPresentation)
             } catch (e: IOException) {
                 Log.d(TAG, "Exception: ${e.message}")
                 dialogInternetTroubleLiveData.call()

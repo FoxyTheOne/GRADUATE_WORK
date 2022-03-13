@@ -32,6 +32,8 @@ import com.myproject.radiojourney.model.presentation.CountryPresentation
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener
+import com.myproject.radiojourney.presentation.authentication.signUp.SignUpFragment
+import com.myproject.radiojourney.presentation.authentication.signUp.SignUpFragmentDirections
 
 /**
  * Главная страница.
@@ -344,8 +346,15 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
                 if (latLon == country.countryLocation) {
                     //match found!  Do something....
                     Log.d(TAG, "Результат - выбран маркер: $latLon = ${country.countryLocation}, ${country.countryName}")
-//                    showRadioStationListDialog(country.countryName)
-//                    viewModel.getRadioStationList()
+
+                    // Перенесём countryCode на RadioListFragment для запроса списка станций
+                    val direction = HomeRadioFragmentDirections.actionHomeRadioFragmentToRadioListFragment("${country.countryCode}||${country.countryName}")
+                    this.findNavController().navigate(direction)
+                    Toast.makeText(
+                        context,
+                        "Asking server for the radio station list...",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
         })
@@ -377,9 +386,4 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
         viewModel.logout()
         this.findNavController().navigate(R.id.action_homeRadioFragment_to_auth_nav_graph)
     }
-
-//    override fun onRadioStationClicked() {
-//        TODO("Not yet implemented")
-//    }
-
 }

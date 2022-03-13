@@ -1,4 +1,4 @@
-package com.myproject.radiojourney.presentation.content.dialogLogOut
+package com.myproject.radiojourney.presentation.content.base
 
 interface ILogOutListener {
     // Метод, который будет вызван из LogOutDialogFragment

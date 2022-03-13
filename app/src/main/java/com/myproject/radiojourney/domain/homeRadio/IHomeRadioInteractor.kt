@@ -7,5 +7,4 @@ import kotlinx.coroutines.flow.Flow
 interface IHomeRadioInteractor {
     suspend fun getCountryListAndSaveToRoom()
     fun subscribeOnCountryList(): Flow<List<CountryPresentation>>
-//    fun getRadioStationList(): List<RadioStationPresentation>
 }

@@ -4,15 +4,16 @@ import android.content.Context
 import android.location.Address
 import android.location.Geocoder
 import android.util.Log
+import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.maps.model.LatLng
 import com.myproject.radiojourney.data.dataSource.local.radio.ILocalRadioDataSource
 import com.myproject.radiojourney.data.dataSource.network.INetworkRadioDataSource
 import com.myproject.radiojourney.domain.iRepository.IContentRepository
 import com.myproject.radiojourney.model.local.CountryLocal
-import com.myproject.radiojourney.model.remote.RadioStationRemote
+import com.myproject.radiojourney.model.local.RadioStationLocal
+import com.myproject.radiojourney.model.presentation.RadioStationPresentation
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
-import java.io.IOException
 import java.util.*
 import javax.inject.Inject
 
@@ -77,7 +78,22 @@ class ContentRepository @Inject constructor(
     override fun subscribeOnCountryList(): Flow<List<CountryLocal>> =
         localRadioDataSource.subscribeOnCountryList()
 
-//    override fun getRadioStationList(): List<RadioStationRemote> {
-//        TODO("Not yet implemented")
-//    }
+    override suspend fun getRadioStationList(countryCode: String): List<RadioStationLocal> {
+        // Получаем список радиостанций из networkRadioDataSource
+        val radioStationRemoteList = networkRadioDataSource.getRadioStationList(countryCode)
+
+        // Преобразуем модельки remote -> local
+        val radioStationLocalList = mutableListOf<RadioStationLocal>()
+
+        radioStationRemoteList.forEach { radioStationRemote ->
+            val radioStationLocal = RadioStationLocal.fromRemoteToLocal(radioStationRemote)
+            radioStationLocalList.add(radioStationLocal)
+        }
+
+        radioStationLocalList.forEach { radioStationPresentation ->
+            Log.d(TAG, "результат запроса радиостанций: ${radioStationPresentation.stationName}")
+        }
+
+        return radioStationLocalList.toList()
+    }
 }

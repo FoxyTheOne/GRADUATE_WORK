@@ -13,6 +13,7 @@ import com.myproject.radiojourney.data.dataSource.network.service.IRadioServiceW
 import com.myproject.radiojourney.data.dataSource.network.service.RadioServiceWrapper
 import com.myproject.radiojourney.data.localDatabaseRoom.AppRoomDBAbstract
 import com.myproject.radiojourney.data.localDatabaseRoom.ICountryDAO
+import com.myproject.radiojourney.data.localDatabaseRoom.IRadioStationDAO
 import com.myproject.radiojourney.data.localDatabaseRoom.IUserDAO
 import com.myproject.radiojourney.data.repository.AuthRepository
 import com.myproject.radiojourney.data.repository.ContentRepository
@@ -26,6 +27,8 @@ import com.myproject.radiojourney.domain.iRepository.IAuthRepository
 import com.myproject.radiojourney.domain.iRepository.IContentRepository
 import com.myproject.radiojourney.domain.logOut.ILogOutInteractor
 import com.myproject.radiojourney.domain.logOut.LogOutInteractor
+import com.myproject.radiojourney.domain.radioList.IRadioListInteractor
+import com.myproject.radiojourney.domain.radioList.RadioListInteractor
 import com.myproject.radiojourney.domain.signUp.ISignUpInteractor
 import com.myproject.radiojourney.domain.signUp.SignUpInteractor
 import dagger.Binds
@@ -81,6 +84,11 @@ abstract class ViewModelModule {
         fun providesCountryDAO(appDatabase: AppRoomDBAbstract): ICountryDAO {
             return appDatabase.getCountryDAO()
         }
+
+        @Provides
+        fun providesRadioStationDAO(appDatabase: AppRoomDBAbstract): IRadioStationDAO {
+            return appDatabase.getRadioStationDAO()
+        }
     }
 
     @Binds
@@ -102,6 +110,11 @@ abstract class ViewModelModule {
     abstract fun bindsHomeRadioInteractor(
         homeRadioInteractor: HomeRadioInteractor
     ) : IHomeRadioInteractor
+
+    @Binds
+    abstract fun bindsRadioListInteractor(
+        radioListInteractor: RadioListInteractor
+    ) : IRadioListInteractor
 
     @Binds
     abstract fun bindsAuthRepository(

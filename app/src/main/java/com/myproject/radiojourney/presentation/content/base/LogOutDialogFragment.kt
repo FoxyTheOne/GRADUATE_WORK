@@ -1,4 +1,4 @@
-package com.myproject.radiojourney.presentation.content.dialogLogOut
+package com.myproject.radiojourney.presentation.content.base
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.DialogFragment
 import com.myproject.radiojourney.R
-import com.myproject.radiojourney.presentation.content.dialogLogOut.ILogOutListener
+import com.myproject.radiojourney.presentation.content.base.ILogOutListener
 import dagger.hilt.android.AndroidEntryPoint
 
 /**

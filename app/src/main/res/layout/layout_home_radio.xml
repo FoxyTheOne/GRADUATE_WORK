@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:fillViewport="true">
 
-    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -38,11 +38,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/background_transparent"
-            android:orientation="vertical"
+            android:orientation="horizontal"
             app:layout_constraintBottom_toTopOf="@+id/linear_radioStationButtons"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/home_toolbar">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_play"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                app:srcCompat="@drawable/play_white"
+                android:layout_marginStart="@dimen/space_beforeOrAfterElement" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_radioStationTitle"
@@ -51,20 +59,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:padding="@dimen/space_beforeOrAfterElement"
-                android:text="@string/homeRadio_selectRadioStation"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/home_toolbar" />
-
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/text_radioStationDescription"
-                style="@style/login_bottom"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingStart="@dimen/space_beforeOrAfterElement"
-                android:paddingEnd="@dimen/space_beforeOrAfterElement"
-                android:paddingBottom="@dimen/space_beforeOrAfterElement"
                 android:text="@string/homeRadio_selectRadioStation" />
+
         </LinearLayout>
 
         <LinearLayout

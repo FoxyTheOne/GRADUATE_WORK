@@ -33,7 +33,4 @@ class HomeRadioInteractor @Inject constructor(
 
             countryPresentationList
         }.flowOn(Dispatchers.IO) // Подписку и превращение делаем в другом потоке -> .flowOn(Dispatchers.IO)
-
-//    override fun getRadioStationList(): List<RadioStationPresentation> =
-//        contentRepository.getRadioStationList()
 }

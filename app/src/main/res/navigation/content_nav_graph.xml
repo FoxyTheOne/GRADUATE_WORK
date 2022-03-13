@@ -12,5 +12,26 @@
             android:id="@+id/action_homeRadioFragment_to_auth_nav_graph"
             app:destination="@id/auth_nav_graph"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_homeRadioFragment_to_radioListFragment"
+            app:destination="@id/radioListFragment" >
+            <!-- Передаём countryCode на следующий фрагмент для запроса списка станций -->
+            <argument
+                android:name="country_code"
+                app:argType="string" />
+
+        </action>
+    </fragment>
+    <fragment
+        android:id="@+id/radioListFragment"
+        android:name="com.myproject.radiojourney.presentation.content.radioList.RadioListFragment"
+        android:label="RadioListFragment" >
+        <action
+            android:id="@+id/action_radioListFragment_to_auth_nav_graph"
+            app:destination="@id/auth_nav_graph"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_radioListFragment_to_homeRadioFragment"
+            app:destination="@id/homeRadioFragment" />
     </fragment>
 </navigation>
