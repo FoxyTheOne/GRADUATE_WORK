@@ -12,6 +12,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.RecyclerView
 import com.myproject.radiojourney.IAppSettings
 import com.myproject.radiojourney.R
 import com.myproject.radiojourney.data.repository.ContentRepository
@@ -38,7 +39,11 @@ class RadioListFragment : BaseContentFragmentAbstract() {
     private lateinit var countryCode: String
     private lateinit var countryName: String
     private lateinit var textRadioStationCity: AppCompatTextView
-    private var radioStationList = listOf<RadioStationPresentation>()
+    private lateinit var radioStationListRecyclerView: RecyclerView
+    private lateinit var radioStationListAdapter: RadioListAdapter
+    private var radioStationList = listOf<RadioStationPresentation>(
+        RadioStationPresentation("Test", "test", 2, "test")
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -68,6 +73,8 @@ class RadioListFragment : BaseContentFragmentAbstract() {
         }
         textRadioStationCity = view.findViewById(R.id.text_radioStationDialogCity)
         textRadioStationCity.text = countryName
+        radioStationListRecyclerView = view.findViewById(R.id.recyclerView_radioStationList)
+//        radioStationListRecyclerView.adapter = RadioListAdapter(radioStationList)
 
         // Получаем список радиостанций, преобразуем. Сохранять в Room не будем. Радиостанций очень много, будет занимать много места на телефоне.
         // Кроме того, списки на сервере постоянно обновляются. Возможно какой-то радиостанции в списке уже не будет, а в локальной БД она ещё осталась. Пользователь выберет её и будет ошибка.
@@ -97,15 +104,23 @@ class RadioListFragment : BaseContentFragmentAbstract() {
         viewModel.dialogInternetTroubleLiveData.observe(viewLifecycleOwner, {
             dialogInternetTrouble.show()
         })
-        viewModel.radioStationListLiveData.observe(viewLifecycleOwner, { radioStationPresentationList ->
-            radioStationList = radioStationPresentationList
-            showProgress()
-            // TODO отобразить в списке на экране
+        viewModel.radioStationListLiveData.observe(
+            viewLifecycleOwner,
+            { radioStationPresentationList ->
+                radioStationList = radioStationPresentationList
+                showProgress()
+
+                // TODO отобразить в списке на экране
+                radioStationListRecyclerView.adapter = RadioListAdapter(radioStationList)
+
                 radioStationPresentationList.forEach { radioStation ->
-                    Log.d(TAG, "результат запроса в локальную БД (радиостанции): ${radioStation.countryCode}, ${radioStation.url}")
+                    Log.d(
+                        TAG,
+                        "результат запроса в локальную БД (радиостанции): ${radioStation.countryCode}, ${radioStation.url}"
+                    )
                 }
-            hideProgress()
-        })
+                hideProgress()
+            })
     }
 
     private fun showProgress() {
