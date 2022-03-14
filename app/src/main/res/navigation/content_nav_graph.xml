@@ -32,6 +32,11 @@
             app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_radioListFragment_to_homeRadioFragment"
-            app:destination="@id/homeRadioFragment" />
+            app:destination="@id/homeRadioFragment">
+
+            <argument
+                android:name="radio_station"
+                app:argType="com.myproject.radiojourney.model.presentation.RadioStationPresentation" />
+        </action>
     </fragment>
 </navigation>

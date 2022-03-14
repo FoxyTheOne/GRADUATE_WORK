@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.myproject.radiojourney.domain.logOut.ILogOutInteractor
 import com.myproject.radiojourney.domain.radioList.IRadioListInteractor
-import com.myproject.radiojourney.extension.call
+import com.myproject.radiojourney.utils.extension.call
 import com.myproject.radiojourney.model.presentation.RadioStationPresentation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers

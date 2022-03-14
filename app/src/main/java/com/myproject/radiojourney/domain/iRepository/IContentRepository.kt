@@ -11,8 +11,14 @@ import kotlinx.coroutines.flow.Flow
  * Repository. Domain layer.
  */
 interface IContentRepository {
-    suspend fun getCountryListAndSaveToRoom()
+//    suspend fun getCountryListAndSaveToRoom()
     fun subscribeOnCountryList(): Flow<List<CountryLocal>>
 
     suspend fun getRadioStationList(countryCode: String): List<RadioStationLocal>
+
+    suspend fun isRadioStationStored(): Boolean
+    suspend fun getRadioStationUrl(): String?
+    suspend fun getRadioStationSaved(radioStationUrl: String): RadioStationLocal?
+
+    suspend fun saveRadioStationUrl(isStored: Boolean, radioStation: RadioStationPresentation)
 }

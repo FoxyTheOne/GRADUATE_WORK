@@ -59,6 +59,16 @@ abstract class SingletonModule {
 
             return roomDatabase
         }
+
+        @Provides
+        fun providesCountryDAO(appDatabase: AppRoomDBAbstract): ICountryDAO {
+            return appDatabase.getCountryDAO()
+        }
+
+        @Provides
+        fun providesRadioStationDAO(appDatabase: AppRoomDBAbstract): IRadioStationDAO {
+            return appDatabase.getRadioStationDAO()
+        }
     }
 
     @Binds
@@ -66,6 +76,21 @@ abstract class SingletonModule {
     abstract fun bindsSharedPreference(
         appSharedPreference: AppSharedPreference
     ) : IAppSharedPreference
+
+    @Binds
+    abstract fun bindsLocalRadioDataSource(
+        localRadioDataSource: LocalRadioDataSource
+    ) : ILocalRadioDataSource
+
+    @Binds
+    abstract fun bindsNetworkRadioDataSource(
+        networkRadioDataSource: NetworkRadioDataSource
+    ) : INetworkRadioDataSource
+
+    @Binds
+    abstract fun bindRadioServiceWrapper(
+        radioServiceWrapper: RadioServiceWrapper
+    ): IRadioServiceWrapper
 
 }
 
@@ -80,15 +105,15 @@ abstract class ViewModelModule {
             return appDatabase.getUserDAO()
         }
 
-        @Provides
-        fun providesCountryDAO(appDatabase: AppRoomDBAbstract): ICountryDAO {
-            return appDatabase.getCountryDAO()
-        }
+//        @Provides
+//        fun providesCountryDAO(appDatabase: AppRoomDBAbstract): ICountryDAO {
+//            return appDatabase.getCountryDAO()
+//        }
 
-        @Provides
-        fun providesRadioStationDAO(appDatabase: AppRoomDBAbstract): IRadioStationDAO {
-            return appDatabase.getRadioStationDAO()
-        }
+//        @Provides
+//        fun providesRadioStationDAO(appDatabase: AppRoomDBAbstract): IRadioStationDAO {
+//            return appDatabase.getRadioStationDAO()
+//        }
     }
 
     @Binds
@@ -131,20 +156,20 @@ abstract class ViewModelModule {
         localAuthDataSource: LocalAuthDataSource
     ) : ILocalAuthDataSource
 
-    @Binds
-    abstract fun bindsLocalRadioDataSource(
-        localRadioDataSource: LocalRadioDataSource
-    ) : ILocalRadioDataSource
+//    @Binds
+//    abstract fun bindsLocalRadioDataSource(
+//        localRadioDataSource: LocalRadioDataSource
+//    ) : ILocalRadioDataSource
+//
+//    @Binds
+//    abstract fun bindsNetworkRadioDataSource(
+//        networkRadioDataSource: NetworkRadioDataSource
+//    ) : INetworkRadioDataSource
 
-    @Binds
-    abstract fun bindsNetworkRadioDataSource(
-        networkRadioDataSource: NetworkRadioDataSource
-    ) : INetworkRadioDataSource
-
-    @Binds
-    abstract fun bindRadioServiceWrapper(
-        radioServiceWrapper: RadioServiceWrapper
-    ): IRadioServiceWrapper
+//    @Binds
+//    abstract fun bindRadioServiceWrapper(
+//        radioServiceWrapper: RadioServiceWrapper
+//    ): IRadioServiceWrapper
 
 }
 

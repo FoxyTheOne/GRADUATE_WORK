@@ -2,6 +2,7 @@ package com.myproject.radiojourney.domain.homeRadio
 
 import com.myproject.radiojourney.domain.iRepository.IContentRepository
 import com.myproject.radiojourney.model.local.CountryLocal
+import com.myproject.radiojourney.model.local.RadioStationLocal
 import com.myproject.radiojourney.model.presentation.CountryPresentation
 import com.myproject.radiojourney.model.presentation.RadioStationPresentation
 import kotlinx.coroutines.Dispatchers
@@ -18,8 +19,8 @@ import javax.inject.Inject
 class HomeRadioInteractor @Inject constructor(
     private val contentRepository: IContentRepository
 ) : IHomeRadioInteractor {
-    override suspend fun getCountryListAndSaveToRoom() =
-        contentRepository.getCountryListAndSaveToRoom()
+//    override suspend fun getCountryListAndSaveToRoom() =
+//        contentRepository.getCountryListAndSaveToRoom()
 
     // local -> presentation
     // Оператор .map помогает перехватить данные и преобразовать их
@@ -32,5 +33,28 @@ class HomeRadioInteractor @Inject constructor(
             }
 
             countryPresentationList
-        }.flowOn(Dispatchers.IO) // Подписку и превращение делаем в другом потоке -> .flowOn(Dispatchers.IO)
+        }
+            .flowOn(Dispatchers.IO) // Подписку и превращение делаем в другом потоке -> .flowOn(Dispatchers.IO)
+
+    override suspend fun isRadioStationStored(): Boolean = contentRepository.isRadioStationStored()
+
+    override suspend fun getRadioStationUrl(): String? = contentRepository.getRadioStationUrl()
+
+    override suspend fun getRadioStationSaved(radioStationUrl: String): RadioStationPresentation? {
+        val radioStationLocalSaved: RadioStationLocal? =
+            contentRepository.getRadioStationSaved(radioStationUrl)
+
+        // local -> presentation
+        var radioStationPresentationSaved: RadioStationPresentation? = null
+
+        radioStationLocalSaved?.let {
+            radioStationPresentationSaved =
+                RadioStationPresentation.fromLocalToPresentation(radioStationLocalSaved)
+        }
+
+        return radioStationPresentationSaved
+    }
+
+    override suspend fun saveRadioStationUrl(isStored: Boolean, radioStation: RadioStationPresentation) =
+        contentRepository.saveRadioStationUrl(isStored, radioStation)
 }

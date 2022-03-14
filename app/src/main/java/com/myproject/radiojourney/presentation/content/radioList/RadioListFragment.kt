@@ -110,8 +110,14 @@ class RadioListFragment : BaseContentFragmentAbstract() {
                 radioStationList = radioStationPresentationList
                 showProgress()
 
-                // TODO отобразить в списке на экране
-                radioStationListRecyclerView.adapter = RadioListAdapter(radioStationList)
+                // 1.5. ОБРАБОТКА КЛИКА -> Получаем результат клика во фрагменте (описываем нашу анонимную функцию из RecyclerView)
+                radioStationListRecyclerView.adapter =
+                    RadioListAdapter(radioStationList) { radioStationPresentationOnClick ->
+                        Log.d(TAG, "Выбранный элемент списка: $radioStationPresentationOnClick")
+                        // Открываем по клику другой фрагмент, передаём туда нашу радиостанцию
+                        val direction = RadioListFragmentDirections.actionRadioListFragmentToHomeRadioFragment(radioStationPresentationOnClick)
+                        this.findNavController().navigate(direction)
+                    }
 
                 radioStationPresentationList.forEach { radioStation ->
                     Log.d(

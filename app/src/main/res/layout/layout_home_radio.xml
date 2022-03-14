@@ -46,8 +46,8 @@
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/image_play"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
                 android:layout_gravity="center"
                 app:srcCompat="@drawable/play_white"
                 android:layout_marginStart="@dimen/space_beforeOrAfterElement" />

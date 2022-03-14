@@ -1,4 +1,4 @@
-package com.myproject.radiojourney.extension
+package com.myproject.radiojourney.utils.extension
 
 import androidx.core.util.PatternsCompat
 

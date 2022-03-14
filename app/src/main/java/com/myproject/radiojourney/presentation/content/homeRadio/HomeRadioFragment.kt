@@ -2,6 +2,8 @@ package com.myproject.radiojourney.presentation.content.homeRadio
 
 import android.annotation.SuppressLint
 import android.app.Dialog
+import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.location.Location
@@ -9,6 +11,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.*
+import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
@@ -32,8 +35,13 @@ import com.myproject.radiojourney.model.presentation.CountryPresentation
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener
+import com.myproject.radiojourney.model.presentation.RadioStationPresentation
 import com.myproject.radiojourney.presentation.authentication.signUp.SignUpFragment
 import com.myproject.radiojourney.presentation.authentication.signUp.SignUpFragmentDirections
+import com.myproject.radiojourney.presentation.content.radioList.RadioListFragment
+import com.myproject.radiojourney.utils.extension.call
+import com.myproject.radiojourney.utils.service.ProgressForegroundService
+import java.io.IOException
 
 /**
  * Главная страница.
@@ -61,6 +69,7 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
     private lateinit var frameLayout: FrameLayout
     private lateinit var progressCircular: ProgressBar
     private lateinit var dialogInternetTrouble: Dialog
+    private lateinit var textRadioStationTitle: AppCompatTextView
 
     // Переменная для нашего FusedLocationProviderClient
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
@@ -78,7 +87,7 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
     private lateinit var buttonZoomMinus: Button
     private lateinit var buttonYouAreHere: Button
 
-//    // ADD MARKERS TO MAP -> 1. Для примера, сейчас. Потом подгружать список по запросу
+    //    // ADD MARKERS TO MAP -> 1. Для примера, сейчас. Потом подгружать список по запросу
 //    private val places: List<Place> = listOf(
 //        Place(name = "Minsk", latLng = LatLng(53.90580039557321, 27.562806971874416))
 //    )
@@ -99,6 +108,7 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        textRadioStationTitle = view.findViewById(R.id.text_radioStationTitle)
         // LOCATION -> 1.4. Получим наш FusedLocationProviderClient. Именно он имеет в себе методы, с помощью которых мы можем определить локацию
         fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(requireContext())
@@ -114,6 +124,18 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
         dialogInternetTrouble = Dialog(requireContext())
         // Передайте ссылку на разметку
         dialogInternetTrouble.setContentView(R.layout.layout_internet_trouble_dialog)
+
+        // 1. Подгрузить радиостанцию из Shared Preference, если она там сохранена. Если нет - текст "выберите радиостанцию"
+        viewModel.getStoredRadioStation()
+        // 2. Получаем радиостанцию из списка на предыдущей странице, если перешли сюда из списка радиостанций
+        arguments?.getParcelable<RadioStationPresentation>("radio_station")?.let { radioStation ->
+            Log.d(TAG, "Выбранный элемент списка: $radioStation")
+            viewModel.saveRadioStationAndShow(radioStation)
+            // Поменить в Shared Preference setRememberLoginAndPasswordSelectedOrNot
+            // Сохранить в Shared Preference url
+            // Сохранить в Room станцию
+            // Отобразить
+        }
 
         // GOOGLE MAPS -> 2.2. Obtain the SupportMapFragment and get notified when the map is ready to be used.
         // Необходимо найти supportFragmentManager в списке всех фрагментов
@@ -158,9 +180,15 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
         initListeners()
         subscribeOnLiveData()
 
-        // Получаем список кодов стран, преобразуем в локальные модели, сохраняем в Room.
-        viewModel.getCountryListAndSaveToRoom()
-        // Затем подписываемся на локальную БД с помощью CountryListFlow (либо CountryListLiveData)
+        // COUNTRY LIST MARKERS ON MAP -> 1. Получаем список кодов стран, преобразуем в локальные модели, сохраняем в Room.
+//        viewModel.getCountryListAndSaveToRoom()
+        requireContext().startService(
+            Intent(
+                requireContext(),
+                ProgressForegroundService::class.java
+            )
+        )
+        // COUNTRY LIST MARKERS ON MAP -> 2. Затем подписываемся на локальную БД с помощью CountryListFlow (либо CountryListLiveData)
         subscribeOnFlow()
     }
 
@@ -184,12 +212,19 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
         viewModel.dialogInternetTroubleLiveData.observe(viewLifecycleOwner, {
             dialogInternetTrouble.show()
         })
+        viewModel.radioStationSavedLiveData.observe(
+            viewLifecycleOwner,
+            { radioStationPresentation ->
+                textRadioStationTitle.text = radioStationPresentation.stationName
+                // TODO метод (проигрывать радиостанцию и ставить на паузу)
+            })
     }
 
     private fun subscribeOnFlow() {
-        lifecycleScope.launchWhenStarted {
+        lifecycleScope.launchWhenCreated {
             viewModel.countryListFlow.collect { countryPresentationList ->
-                countryList = countryPresentationList // Заполним массив для последующей обработки клика
+                countryList =
+                    countryPresentationList // Заполним массив для последующей обработки клика
                 showProgress()
                 countryPresentationList.forEach { countryPresentation ->
                     addMarkersOnMap(countryPresentation)
@@ -345,10 +380,14 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
             for (country in countryList) {
                 if (latLon == country.countryLocation) {
                     //match found!  Do something....
-                    Log.d(TAG, "Результат - выбран маркер: $latLon = ${country.countryLocation}, ${country.countryName}")
+                    Log.d(
+                        TAG,
+                        "Результат - выбран маркер: $latLon = ${country.countryLocation}, ${country.countryName}"
+                    )
 
                     // Перенесём countryCode на RadioListFragment для запроса списка станций
-                    val direction = HomeRadioFragmentDirections.actionHomeRadioFragmentToRadioListFragment("${country.countryCode}||${country.countryName}")
+                    val direction =
+                        HomeRadioFragmentDirections.actionHomeRadioFragmentToRadioListFragment("${country.countryCode}||${country.countryName}")
                     this.findNavController().navigate(direction)
                     Toast.makeText(
                         context,

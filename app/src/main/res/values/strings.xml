@@ -33,4 +33,7 @@
 
     <string name="dialogRadioStationList_title">Radio station list. Select one:</string>
     <string name="dialogRadioStationList_count">Radio station click count: </string>
+
+    <string name="foregroundNotification_name">Cashing. Please, wait. </string>
+    <string name="foregroundNotification_description">Cashing… </string>
 </resources>
