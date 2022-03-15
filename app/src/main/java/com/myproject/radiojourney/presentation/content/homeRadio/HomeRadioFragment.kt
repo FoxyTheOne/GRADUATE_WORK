@@ -2,7 +2,6 @@ package com.myproject.radiojourney.presentation.content.homeRadio
 
 import android.annotation.SuppressLint
 import android.app.Dialog
-import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
@@ -11,6 +10,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.*
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -18,10 +18,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.location.*
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
 import com.google.android.gms.tasks.CancellationToken
 import com.google.android.gms.tasks.OnTokenCanceledListener
@@ -36,12 +33,9 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener
 import com.myproject.radiojourney.model.presentation.RadioStationPresentation
-import com.myproject.radiojourney.presentation.authentication.signUp.SignUpFragment
-import com.myproject.radiojourney.presentation.authentication.signUp.SignUpFragmentDirections
-import com.myproject.radiojourney.presentation.content.radioList.RadioListFragment
-import com.myproject.radiojourney.utils.extension.call
 import com.myproject.radiojourney.utils.service.ProgressForegroundService
-import java.io.IOException
+import android.widget.Toast
+
 
 /**
  * Главная страница.
@@ -70,6 +64,15 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
     private lateinit var progressCircular: ProgressBar
     private lateinit var dialogInternetTrouble: Dialog
     private lateinit var textRadioStationTitle: AppCompatTextView
+    private lateinit var textLoadingData: AppCompatTextView
+    private lateinit var textIfFistLaunch: AppCompatTextView
+    private lateinit var imagePlay: AppCompatImageView
+    private var isPaused = true
+
+    // PLAY URL -> 1. MediaPlayer
+//    private var mediaPlayer: MediaPlayer? = null
+//    private var audioUrl: String = ""
+    private var isStationSelected = false
 
     // Переменная для нашего FusedLocationProviderClient
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
@@ -109,6 +112,10 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         textRadioStationTitle = view.findViewById(R.id.text_radioStationTitle)
+        textIfFistLaunch = view.findViewById(R.id.text_ifFistLaunch)
+        textLoadingData = view.findViewById(R.id.text_loadingData)
+        imagePlay = view.findViewById(R.id.image_play)
+        imagePlay.setImageResource(R.drawable.play_white)
         // LOCATION -> 1.4. Получим наш FusedLocationProviderClient. Именно он имеет в себе методы, с помощью которых мы можем определить локацию
         fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(requireContext())
@@ -131,10 +138,12 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
         arguments?.getParcelable<RadioStationPresentation>("radio_station")?.let { radioStation ->
             Log.d(TAG, "Выбранный элемент списка: $radioStation")
             viewModel.saveRadioStationAndShow(radioStation)
-            // Поменить в Shared Preference setRememberLoginAndPasswordSelectedOrNot
-            // Сохранить в Shared Preference url
-            // Сохранить в Room станцию
-            // Отобразить
+
+            // Сразу включим выбранную радиостанцию:
+            Toast.makeText(context, "Connecting to radio station...", Toast.LENGTH_SHORT).show()
+            isPaused = false
+            imagePlay.setImageResource(R.drawable.pause_white)
+            viewModel.playAudio()
         }
 
         // GOOGLE MAPS -> 2.2. Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -151,6 +160,8 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
 //            addMarkers(googleMap)
             // Set custom info window adapter
             googleMap.setInfoWindowAdapter(MarkerInfoWindowAdapter(requireContext()))
+            googleMap.uiSettings.isZoomControlsEnabled =
+                false // отключаем кнопки по умолчанию, чтобы настроить свои
         }
 
         // Настраиваем наш customMarker
@@ -194,10 +205,32 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
 
     private fun initListeners() {
         // Кнопки на карте
-        buttonZoomPlus.setOnClickListener {}
-        buttonZoomMinus.setOnClickListener {}
+        buttonZoomPlus.setOnClickListener {
+            mMap.animateCamera(CameraUpdateFactory.zoomIn())
+        }
+        buttonZoomMinus.setOnClickListener {
+            mMap.animateCamera(CameraUpdateFactory.zoomOut())
+        }
         buttonYouAreHere.setOnClickListener {
             getCurrentOrLastLocation()
+        }
+        imagePlay.setOnClickListener {
+            if (isStationSelected) {
+                if (isPaused) {
+                    // Нажали кнопку play
+                    Toast.makeText(context, "Connecting to radio station...", Toast.LENGTH_SHORT)
+                        .show()
+                    imagePlay.setImageResource(R.drawable.pause_white)
+                    // PLAY URL -> 2. MediaPlayer play
+                    viewModel.playAudio()
+                } else {
+                    // Нажали кнопку stop
+                    imagePlay.setImageResource(R.drawable.play_white)
+                    // PLAY URL -> 3. MediaPlayer stop
+                    viewModel.stopAudio()
+                }
+                isPaused = !isPaused
+            }
         }
     }
 
@@ -218,11 +251,30 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
                 textRadioStationTitle.text = radioStationPresentation.stationName
                 // TODO метод (проигрывать радиостанцию и ставить на паузу)
             })
+//        viewModel.audioUrlLiveData.observe(viewLifecycleOwner, { url ->
+//            audioUrl = url
+//        })
+        viewModel.isStationSelectedLiveData.observe(viewLifecycleOwner, {
+            isStationSelected = it
+        })
+        viewModel.isRadioPlayingLiveData.observe(viewLifecycleOwner, {
+            Toast.makeText(context, "Audio started playing", Toast.LENGTH_SHORT).show()
+        })
+        viewModel.isUrlEmptyLiveData.observe(viewLifecycleOwner, {
+            Toast.makeText(context, "Failed to connect. Try again or select another one", Toast.LENGTH_SHORT).show()
+            isPaused = true
+            imagePlay.setImageResource(R.drawable.play_white)
+        })
+        viewModel.isRadioStoppedLiveData.observe(viewLifecycleOwner, {
+            Toast.makeText(context, "Audio has been paused", Toast.LENGTH_SHORT).show();
+        })
     }
 
     private fun subscribeOnFlow() {
         lifecycleScope.launchWhenCreated {
             viewModel.countryListFlow.collect { countryPresentationList ->
+                textIfFistLaunch.isVisible = false
+                textLoadingData.isVisible = false
                 countryList =
                     countryPresentationList // Заполним массив для последующей обработки клика
                 showProgress()
@@ -242,6 +294,67 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
             }
         }
     }
+
+//    // PLAY URL -> 4. MediaPlayer play url
+//    private fun playAudio() {
+//        if (audioUrl.isNotBlank()) {
+//            // initializing media player
+//            mediaPlayer = MediaPlayer()
+//
+//            // below line is use to set the audio stream type for our media player.
+//
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//                mediaPlayer!!.setAudioAttributes(
+//                    AudioAttributes.Builder()
+//                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+//                        .build()
+//                )
+//            } else {
+//                mediaPlayer!!.setAudioStreamType(AudioManager.STREAM_MUSIC)
+//            }
+//
+//            // below line is use to set our url to our media player.
+//            try {
+//                mediaPlayer!!.setDataSource(audioUrl)
+//                // below line is use to prepare and start our media player.
+//                mediaPlayer!!.prepare()
+//                mediaPlayer!!.start()
+//            } catch (e: IOException) {
+//                e.printStackTrace()
+//            }
+//            // below line is use to display a toast message.
+//            Toast.makeText(context, "Audio started playing", Toast.LENGTH_SHORT).show()
+//        } else {
+//            Toast.makeText(context, "Radio url is empty", Toast.LENGTH_SHORT).show()
+//        }
+//    }
+
+//    private fun stopAudio() {
+//        // checking the media player if the audio is playing or not.
+//        mediaPlayer?.let { nonNullMediaPlayer ->
+//            if (nonNullMediaPlayer.isPlaying) {
+//                // pausing the media player
+//                // if media player is playing we are calling below line to stop our media player.
+//                nonNullMediaPlayer.stop()
+//                nonNullMediaPlayer.reset()
+//                nonNullMediaPlayer.release()
+//
+//                // below line is to display a message when media player is paused.
+//                Toast.makeText(
+//                    context,
+//                    "Audio has been paused",
+//                    Toast.LENGTH_SHORT
+//                ).show();
+//            } else {
+//                // this method is called when media player is not playing.
+//                Toast.makeText(
+//                    context,
+//                    "Audio has not played",
+//                    Toast.LENGTH_SHORT
+//                ).show();
+//            }
+//        }
+//    }
 
     private fun showProgress() {
         frameLayout.isVisible = true
@@ -380,6 +493,7 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
             for (country in countryList) {
                 if (latLon == country.countryLocation) {
                     //match found!  Do something....
+                    viewModel.stopAudio()
                     Log.d(
                         TAG,
                         "Результат - выбран маркер: $latLon = ${country.countryLocation}, ${country.countryName}"

@@ -90,9 +90,10 @@ class ContentRepository @Inject constructor(
             radioStationLocalList.add(radioStationLocal)
         }
 
-        radioStationLocalList.forEach { radioStationPresentation ->
-            Log.d(TAG, "результат запроса радиостанций: ${radioStationPresentation.stationName}")
-        }
+        Log.d(
+            TAG,
+            "Успешный запрос; результат запроса радиостанций[0]: ${radioStationLocalList[0]}"
+        )
 
         return radioStationLocalList.toList()
     }
@@ -104,7 +105,10 @@ class ContentRepository @Inject constructor(
     override suspend fun getRadioStationSaved(radioStationUrl: String): RadioStationLocal? =
         localRadioDataSource.getRadioStationSaved(radioStationUrl)
 
-    override suspend fun saveRadioStationUrl(isStored: Boolean, radioStation: RadioStationPresentation) {
+    override suspend fun saveRadioStationUrl(
+        isStored: Boolean,
+        radioStation: RadioStationPresentation
+    ) {
         val radioStationLocal = RadioStationLocal.fromPresentationToLocal(radioStation)
         localRadioDataSource.saveRadioStationUrl(isStored, radioStationLocal)
     }

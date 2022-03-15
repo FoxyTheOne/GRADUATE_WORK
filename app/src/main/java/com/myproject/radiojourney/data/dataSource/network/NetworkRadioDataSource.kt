@@ -4,6 +4,8 @@ import com.myproject.radiojourney.model.remote.CountryCodeRemote
 import android.util.Log
 import com.myproject.radiojourney.data.dataSource.network.service.IRadioServiceWrapper
 import com.myproject.radiojourney.model.remote.RadioStationRemote
+import com.myproject.radiojourney.utils.service.ProgressForegroundService
+import java.io.IOException
 import java.net.InetAddress
 import java.net.UnknownHostException
 import java.util.*
@@ -32,19 +34,24 @@ class NetworkRadioDataSource @Inject constructor(
 
         val resultDNSIterator = listDNSResultArray.iterator()
         while (resultDNSIterator.hasNext()) {
-            val baseURL = "https://${resultDNSIterator.next()}"
-            Log.d(TAG, "результат baseURL = $baseURL")
+            try {
+                val baseURL = "https://${resultDNSIterator.next()}"
+                Log.d(TAG, "результат baseURL = $baseURL")
 
-            // radioServiceWrapper - обёртка. Инициализируем retrofit и получаем сервис:
-            val radioService = radioServiceWrapper.getRadioService(baseURL)
-            // И затем делаем запрос getCountryCodeList():
-            countryCodeRemoteList = radioService.getCountryCodeList()
+                // radioServiceWrapper - обёртка. Инициализируем retrofit и получаем сервис:
+                val radioService = radioServiceWrapper.getRadioService(baseURL)
+                // И затем делаем запрос getCountryCodeList():
+                countryCodeRemoteList = radioService.getCountryCodeList()
 
-            countryCodeRemoteList.forEach { result ->
-                Log.d(TAG, "результат запроса countryCodeRemoteList: $result")
+                countryCodeRemoteList.forEach { result ->
+                    Log.d(TAG, "результат запроса countryCodeRemoteList: $result")
+                }
+
+                if (countryCodeRemoteList != emptyList<String>()) break
+            } catch (e: IOException) {
+                Log.d(TAG, "Exception: ${e.message}. Problem with the server")
+                continue
             }
-
-            if (countryCodeRemoteList != emptyList<String>()) break
         }
 
         return countryCodeRemoteList

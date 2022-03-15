@@ -1,5 +1,9 @@
 package com.myproject.radiojourney.presentation.content.homeRadio
 
+import android.media.AudioAttributes
+import android.media.AudioManager
+import android.media.MediaPlayer
+import android.os.Build
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -25,6 +29,14 @@ class HomeRadioViewModel @Inject constructor(
     companion object {
         private const val TAG = "HomeRadioViewModel"
     }
+
+    private var mediaPlayer: MediaPlayer? = null
+    private var audioUrl: String = ""
+
+    val isRadioPlayingLiveData = MutableLiveData<Boolean>()
+    val isRadioStoppedLiveData = MutableLiveData<Boolean>()
+    val isUrlEmptyLiveData = MutableLiveData<Boolean>()
+    val isStationSelectedLiveData = MutableLiveData<Boolean>()
 
     // Подписка на локальную БД
     val countryListFlow = homeRadioInteractor.subscribeOnCountryList()
@@ -82,6 +94,8 @@ class HomeRadioViewModel @Inject constructor(
                         "Передаются значения в LiveData: nonNullRadioStation = $nonNullRadioStation"
                     )
                     radioStationSavedLiveData.postValue(nonNullRadioStation)
+                    audioUrl = nonNullRadioStation.url
+                    isStationSelectedLiveData.call()
                 }
             }
         }
@@ -95,6 +109,79 @@ class HomeRadioViewModel @Inject constructor(
             homeRadioInteractor.saveRadioStationUrl(true, radioStation)
             // Отобразить
             radioStationSavedLiveData.postValue(radioStation)
+            audioUrl = radioStation.url
+            isStationSelectedLiveData.call()
+        }
+    }
+
+    // PLAY URL -> 4. MediaPlayer play url
+    fun playAudio() {
+        viewModelScope.launch(Dispatchers.IO) {
+
+            if (audioUrl.isNotBlank()) {
+                mediaPlayer = null // Не всегда сбрасывается
+
+                // initializing media player
+                mediaPlayer = MediaPlayer()
+
+                // below line is use to set the audio stream type for our media player.
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    mediaPlayer!!.setAudioAttributes(
+                        AudioAttributes.Builder()
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .build()
+                    )
+                } else {
+                    mediaPlayer!!.setAudioStreamType(AudioManager.STREAM_MUSIC)
+                }
+
+                // below line is use to set our url to our media player.
+                try {
+                    try {
+                        mediaPlayer!!.setDataSource(audioUrl)
+                    } catch (e: IOException) {
+                        isUrlEmptyLiveData.call()
+                        e.printStackTrace()
+                    }
+                    // below line is use to prepare and start our media player.
+                    mediaPlayer!!.prepare()
+                    mediaPlayer!!.start()
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+
+                // below line is use to display a toast message.
+                isRadioPlayingLiveData.call()
+            } else {
+                isUrlEmptyLiveData.call()
+            }
+
+        }
+    }
+
+    // checking the media player if the audio is playing or not.
+    fun stopAudio() {
+        viewModelScope.launch(Dispatchers.IO) {
+
+            try {
+                mediaPlayer?.let { nonNullMediaPlayer ->
+                    if (nonNullMediaPlayer.isPlaying) {
+                        // pausing the media player
+                        // if media player is playing we are calling below line to stop our media player.
+                        nonNullMediaPlayer.stop()
+//                        nonNullMediaPlayer.reset() -> Вместо этого - mediaPlayer = null. This is only for those who get error when your activity is in stop or in resume state.
+                        nonNullMediaPlayer.release()
+                        mediaPlayer = null
+
+                        // below line is to display a message when media player is paused.
+                        isRadioStoppedLiveData.call()
+                    }
+                }
+            } catch (e: IllegalStateException) {
+                e.printStackTrace();
+            }
+
         }
     }
 

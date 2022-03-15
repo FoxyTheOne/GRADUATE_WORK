@@ -16,6 +16,10 @@
     Разрешение для Foreground Service:
      -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <!--
+        Разрешение для Alert Window:
+    -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application
         android:name=".App"

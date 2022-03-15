@@ -36,4 +36,6 @@
 
     <string name="foregroundNotification_name">Cashing. Please, wait. </string>
     <string name="foregroundNotification_description">Cashing… </string>
+    <string name="foregroundNotification_failedName">Cashing failed.</string>
+    <string name="foregroundNotification_failedDescription">Please, try turn on and then turn off airplane mode. And then restart the program, if needed.</string>
 </resources>
