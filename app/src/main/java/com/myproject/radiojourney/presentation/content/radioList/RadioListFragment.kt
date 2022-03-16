@@ -115,16 +115,18 @@ class RadioListFragment : BaseContentFragmentAbstract() {
                     RadioListAdapter(radioStationList) { radioStationPresentationOnClick ->
                         Log.d(TAG, "Выбранный элемент списка: $radioStationPresentationOnClick")
                         // Открываем по клику другой фрагмент, передаём туда нашу радиостанцию
-                        val direction = RadioListFragmentDirections.actionRadioListFragmentToHomeRadioFragment(radioStationPresentationOnClick)
+                        val direction =
+                            RadioListFragmentDirections.actionRadioListFragmentToHomeRadioFragment(
+                                radioStationPresentationOnClick
+                            )
                         this.findNavController().navigate(direction)
                     }
 
-                radioStationPresentationList.forEach { radioStation ->
-                    Log.d(
-                        TAG,
-                        "результат запроса в локальную БД (радиостанции): ${radioStation.countryCode}, ${radioStation.url}"
-                    )
-                }
+                Log.d(
+                    TAG,
+                    "Успешный запрос в локальную БД (радиостанции). Получен результат [0]: ${radioStationPresentationList[0].countryCode}, ${radioStationPresentationList[0].url}"
+                )
+
                 hideProgress()
             })
     }

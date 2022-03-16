@@ -2,10 +2,19 @@ package com.myproject.radiojourney.presentation.content.homeRadio
 
 import android.annotation.SuppressLint
 import android.app.Dialog
+import android.content.Context
+import android.content.Context.AUDIO_SERVICE
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.location.Location
+import android.media.AudioAttributes
+import android.media.AudioManager
+import android.media.MediaPlayer
+import android.media.MediaPlayer.MEDIA_ERROR_SERVER_DIED
+import android.media.MediaRecorder.MEDIA_ERROR_SERVER_DIED
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -35,6 +44,12 @@ import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener
 import com.myproject.radiojourney.model.presentation.RadioStationPresentation
 import com.myproject.radiojourney.utils.service.ProgressForegroundService
 import android.widget.Toast
+import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.content.PackageManagerCompat
+import androidx.core.content.PackageManagerCompat.LOG_TAG
+import java.io.IOException
+import java.lang.Exception
+import androidx.core.content.PackageManagerCompat.LOG_TAG
 
 
 /**
@@ -65,13 +80,15 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
     private lateinit var dialogInternetTrouble: Dialog
     private lateinit var textRadioStationTitle: AppCompatTextView
     private lateinit var textLoadingData: AppCompatTextView
-    private lateinit var textIfFistLaunch: AppCompatTextView
     private lateinit var imagePlay: AppCompatImageView
     private var isPaused = true
 
-    // PLAY URL -> 1. MediaPlayer
-//    private var mediaPlayer: MediaPlayer? = null
-//    private var audioUrl: String = ""
+    // PLAY URL (MP3), MEDIA PLAYER -> 1. Создаём переменные
+    // MediaPlayer – класс, который позволит вам проигрывать аудио/видео файлы с возможностью сделать паузу и перемотать в нужную позицию.
+    // MediaPlayer умеет работать с различными источниками, это может быть: путь к файлу (на SD или в инете), адрес потока, Uri или файл из папки res/raw.
+    var mediaPlayer: MediaPlayer? = null
+    var audioManager: AudioManager? = null
+    private var audioUrl: String = ""
     private var isStationSelected = false
 
     // Переменная для нашего FusedLocationProviderClient
@@ -112,7 +129,6 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         textRadioStationTitle = view.findViewById(R.id.text_radioStationTitle)
-        textIfFistLaunch = view.findViewById(R.id.text_ifFistLaunch)
         textLoadingData = view.findViewById(R.id.text_loadingData)
         imagePlay = view.findViewById(R.id.image_play)
         imagePlay.setImageResource(R.drawable.play_white)
@@ -132,18 +148,15 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
         // Передайте ссылку на разметку
         dialogInternetTrouble.setContentView(R.layout.layout_internet_trouble_dialog)
 
+        // PLAY URL (MP3), MEDIA PLAYER -> 2. Получаем AudioManager
+        audioManager = context?.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
         // 1. Подгрузить радиостанцию из Shared Preference, если она там сохранена. Если нет - текст "выберите радиостанцию"
         viewModel.getStoredRadioStation()
         // 2. Получаем радиостанцию из списка на предыдущей странице, если перешли сюда из списка радиостанций
         arguments?.getParcelable<RadioStationPresentation>("radio_station")?.let { radioStation ->
             Log.d(TAG, "Выбранный элемент списка: $radioStation")
             viewModel.saveRadioStationAndShow(radioStation)
-
-            // Сразу включим выбранную радиостанцию:
-            Toast.makeText(context, "Connecting to radio station...", Toast.LENGTH_SHORT).show()
-            isPaused = false
-            imagePlay.setImageResource(R.drawable.pause_white)
-            viewModel.playAudio()
         }
 
         // GOOGLE MAPS -> 2.2. Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -214,22 +227,28 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
         buttonYouAreHere.setOnClickListener {
             getCurrentOrLastLocation()
         }
+        textRadioStationTitle.setOnClickListener {
+            if (isStationSelected) {
+                if (isPaused) {
+                    // Нажали кнопку play
+                    playAudio()
+                } else {
+                    // Нажали кнопку stop
+                    stopAudio()
+                    Toast.makeText(context, "Audio stopped", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
         imagePlay.setOnClickListener {
             if (isStationSelected) {
                 if (isPaused) {
                     // Нажали кнопку play
-                    Toast.makeText(context, "Connecting to radio station...", Toast.LENGTH_SHORT)
-                        .show()
-                    imagePlay.setImageResource(R.drawable.pause_white)
-                    // PLAY URL -> 2. MediaPlayer play
-                    viewModel.playAudio()
+                    playAudio()
                 } else {
                     // Нажали кнопку stop
-                    imagePlay.setImageResource(R.drawable.play_white)
-                    // PLAY URL -> 3. MediaPlayer stop
-                    viewModel.stopAudio()
+                    stopAudio()
+                    Toast.makeText(context, "Audio stopped", Toast.LENGTH_SHORT).show()
                 }
-                isPaused = !isPaused
             }
         }
     }
@@ -249,31 +268,32 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
             viewLifecycleOwner,
             { radioStationPresentation ->
                 textRadioStationTitle.text = radioStationPresentation.stationName
+                audioUrl = radioStationPresentation.url
+                isStationSelected = true
                 // TODO метод (проигрывать радиостанцию и ставить на паузу)
             })
-//        viewModel.audioUrlLiveData.observe(viewLifecycleOwner, { url ->
-//            audioUrl = url
+
+//        // ???
+//        viewModel.isRadioPlayingLiveData.observe(viewLifecycleOwner, {
+//            Toast.makeText(context, "Audio started playing", Toast.LENGTH_SHORT).show()
 //        })
-        viewModel.isStationSelectedLiveData.observe(viewLifecycleOwner, {
-            isStationSelected = it
-        })
-        viewModel.isRadioPlayingLiveData.observe(viewLifecycleOwner, {
-            Toast.makeText(context, "Audio started playing", Toast.LENGTH_SHORT).show()
-        })
-        viewModel.isUrlEmptyLiveData.observe(viewLifecycleOwner, {
-            Toast.makeText(context, "Failed to connect. Try again or select another one", Toast.LENGTH_SHORT).show()
-            isPaused = true
-            imagePlay.setImageResource(R.drawable.play_white)
-        })
-        viewModel.isRadioStoppedLiveData.observe(viewLifecycleOwner, {
-            Toast.makeText(context, "Audio has been paused", Toast.LENGTH_SHORT).show();
-        })
+//        viewModel.isUrlEmptyLiveData.observe(viewLifecycleOwner, {
+//            Toast.makeText(
+//                context,
+//                "Failed to connect. Try again or select another one",
+//                Toast.LENGTH_SHORT
+//            ).show()
+//            isPaused = true
+//            imagePlay.setImageResource(R.drawable.play_white)
+//        })
+//        viewModel.isRadioStoppedLiveData.observe(viewLifecycleOwner, {
+//            Toast.makeText(context, "Audio has been paused", Toast.LENGTH_SHORT).show();
+//        })
     }
 
     private fun subscribeOnFlow() {
         lifecycleScope.launchWhenCreated {
             viewModel.countryListFlow.collect { countryPresentationList ->
-                textIfFistLaunch.isVisible = false
                 textLoadingData.isVisible = false
                 countryList =
                     countryPresentationList // Заполним массив для последующей обработки клика
@@ -294,6 +314,99 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
             }
         }
     }
+
+
+    // PLAY URL (MP3), MEDIA PLAYER -> 3. Метод для запуска проигрывания.
+    private fun playAudio() {
+        // Сначала мы освобождаем ресурсы текущего проигрывателя.
+        releaseMediaPlayer()
+
+        // Затем стартуем проигрывание.
+        Toast.makeText(context, "Connecting to radio station...", Toast.LENGTH_SHORT).show()
+        imagePlay.setImageResource(R.drawable.pause_white)
+        isPaused = false
+
+        try {
+            Log.d(TAG, "PLAY URL (MP3), MEDIA PLAYER -> start playing HTTP")
+            mediaPlayer = MediaPlayer().apply {
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    setAudioAttributes(
+                        AudioAttributes.Builder()
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .setUsage(AudioAttributes.USAGE_MEDIA)
+                            .build()
+                    )
+                } else {
+                    setAudioStreamType(AudioManager.STREAM_MUSIC)
+                }
+                // setAudioStreamType – задает аудио-поток, который будет использован для проигрывания.
+                // Их существует несколько: STREAM_MUSIC, STREAM_NOTIFICATION и п.
+                // Предполагаю, что созданы они для того, чтобы можно было задавать разные уровни громкости, например, играм, звонкам и уведомлениям.
+                // Этот метод можно и пропустить, если вам не надо явно указывать какой-то поток. Насколько я понял, по умолчанию используется STREAM_MUSIC.
+
+                reset()
+
+                try {
+                    setDataSource(audioUrl)
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+
+                // Далее используется метод prepare или prepareAsync (в паре с OnPreparedListener).
+                // Эти методы подготавливают плеер к проигрыванию. И, как понятно из названия, prepareAsync делает это асинхронно,
+                // и, когда все сделает, сообщит об этом слушателю из метода setOnPreparedListener.
+                // А метод prepare работает синхронно. Соотвественно, если хотим прослушать файл из инета, то используем prepareAsync,
+                // иначе наше приложение повесится, т.к. заблокируется основной поток, который обслуживает UI.
+                Log.d(TAG, "PLAY URL (MP3), MEDIA PLAYER -> prepareAsync")
+                setOnPreparedListener(MediaPlayer.OnPreparedListener {
+                    Log.d(TAG, "PLAY URL (MP3), MEDIA PLAYER -> onPrepared")
+                    it.start() // Метод start запускает проигрывание
+                    Toast.makeText(context, "Audio started playing", Toast.LENGTH_SHORT).show()
+                })
+                prepareAsync() // might take long! (for buffering, etc)
+                setOnErrorListener(MediaPlayer.OnErrorListener { mp, what, extra ->
+                    stopAudio()
+                    Log.d(TAG, "PLAY URL (MP3), MEDIA PLAYER -> setOnErrorListener $what $extra")
+                    true
+                })
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+            Toast.makeText(
+                context,
+                "Failed to connect. Try to click \"play\" or select another station",
+                Toast.LENGTH_SHORT
+            ).show()
+            stopAudio()
+        }
+
+        if (mediaPlayer == null) return
+    }
+
+    // PLAY URL (MP3), MEDIA PLAYER -> 4. В методе releaseMP мы выполняем метод release.
+    // Он освобождает используемые проигрывателем ресурсы, его рекомендуется вызывать когда вы закончили работу с плеером.
+    // Более того, хелп рекомендует вызывать этот метод и при onPause/onStop, если нет острой необходимости держать объект.
+    private fun releaseMediaPlayer() {
+
+        try {
+            mediaPlayer?.release()
+            mediaPlayer = null
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+    }
+
+    // PLAY URL (MP3), MEDIA PLAYER -> 5. Метод для остановки проигрывания
+    private fun stopAudio() {
+        imagePlay.setImageResource(R.drawable.play_white)
+        isPaused = true
+
+        mediaPlayer?.stop() // Останавливает проигрывание
+        releaseMediaPlayer()
+    }
+
 
 //    // PLAY URL -> 4. MediaPlayer play url
 //    private fun playAudio() {
@@ -493,7 +606,10 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
             for (country in countryList) {
                 if (latLon == country.countryLocation) {
                     //match found!  Do something....
-                    viewModel.stopAudio()
+
+                    // Если нажали на маркер, перед переходом на список нужно остановить музыку
+                    stopAudio()
+
                     Log.d(
                         TAG,
                         "Результат - выбран маркер: $latLon = ${country.countryLocation}, ${country.countryName}"
@@ -538,5 +654,11 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
     override fun onLogOut() {
         viewModel.logout()
         this.findNavController().navigate(R.id.action_homeRadioFragment_to_auth_nav_graph)
+    }
+
+    // PLAY URL (MP3), MEDIA PLAYER -> 6. В методе onDestroy обязательно освобождаем ресурсы проигрывателя
+    override fun onDestroy() {
+        super.onDestroy()
+        releaseMediaPlayer()
     }
 }

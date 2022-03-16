@@ -89,9 +89,10 @@ class NetworkRadioDataSource @Inject constructor(
             // И затем делаем запрос getCountryCodeList():
             radioStationRemoteList = radioService.getRadioStationList(searchTerm = countryCode)
 
-            radioStationRemoteList.forEach { result ->
-                Log.d(TAG, "результат запроса radioStationRemoteList: ${result.name}")
-            }
+            Log.d(
+                TAG,
+                "Успешный запрос. Получен результат radioStationRemoteList [0]: ${radioStationRemoteList[0]}"
+            )
 
             if (radioStationRemoteList != emptyList<String>()) break
         }

@@ -157,10 +157,9 @@ class ProgressForegroundService @Inject constructor() : Service() {
                     // Узнаем название страны
                     val loc: Locale = Locale("", countryCodeRemote.name)
                     val countryName = loc.displayName
-                    Log.d(TAG, "результат countryName: $countryName")
 
                     // Узнаем местоположение
-                    // В этом месте вылетает, если проблема с интернетом
+                    // В этом месте часто исключение, как будто проблема с интернетом
                     addresses = geocoder.getFromLocationName(countryName, 1)
                     var latitude: Double = 0.0
                     var longitude: Double = 0.0
@@ -189,12 +188,10 @@ class ProgressForegroundService @Inject constructor() : Service() {
                     }
                 }
 
-                countryLocalList.forEach { countryLocal ->
                     Log.d(
                         TAG,
-                        "результат преобразования названия страны: ${countryLocal.countryName}"
+                        "Успешное преобразование стран. Получен результат [0]: ${countryLocalList[0]}"
                     )
-                }
 
                 // Теперь сохраним наши страны в Room
                 localRadioDataSource.saveCountryList(countryLocalList)
@@ -212,6 +209,7 @@ class ProgressForegroundService @Inject constructor() : Service() {
 //                // NOTIFICATION -> 2. Notification for minimum target API level is 4+
 //                val nManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 //                nManager.notify(6, notificationBuilder2?.build())
+                // TODO сброс и перезапуск кеширования
             }
         }
     }
