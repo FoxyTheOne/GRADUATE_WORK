@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             android:background="@color/background_transparent"
             android:orientation="horizontal"
-            app:layout_constraintBottom_toTopOf="@+id/linear_radioStationButtons"
+            app:layout_constraintBottom_toTopOf="@+id/linear_canTakeTime"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/home_toolbar">
@@ -64,6 +64,41 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/linear_canTakeTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/background_transparent"
+            android:gravity="start"
+            android:orientation="vertical"
+            android:paddingBottom="@dimen/space_beforeOrAfterElement"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/linear_radioStationDescription"
+            app:layout_constraintBottom_toTopOf="@+id/linear_radioStationButtons">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_canTakeTime"
+                style="@style/login_bottom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:paddingStart="@dimen/space_beforeOrAfterElement"
+                android:paddingEnd="@dimen/space_beforeOrAfterElement"
+                android:text="@string/homeRadio_canTakeTime" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_mayNotWork"
+                style="@style/login_bottom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:paddingStart="@dimen/space_beforeOrAfterElement"
+                android:paddingEnd="@dimen/space_beforeOrAfterElement"
+                android:text="@string/homeRadio_mayNotWork" />
+
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/linear_radioStationButtons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -73,7 +108,7 @@
             android:paddingBottom="@dimen/space_beforeOrAfterElement"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/linear_radioStationDescription">
+            app:layout_constraintTop_toBottomOf="@+id/linear_canTakeTime" >
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_addToFavorites"

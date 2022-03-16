@@ -27,6 +27,10 @@ import java.util.*
 import javax.inject.Inject
 import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
+import com.myproject.radiojourney.MainActivity
+
+
+
 
 /**
  * Создадим Foreground Service
@@ -157,6 +161,21 @@ class ProgressForegroundService @Inject constructor() : Service() {
                     // Узнаем название страны
                     val loc: Locale = Locale("", countryCodeRemote.name)
                     val countryName = loc.displayName
+
+
+
+//                    try {
+//                        val geocoder = Geocoder(this@MainActivity, Locale.getDefault())
+//                        val addresses: List<*> = geocoder.getFromLocation(latitude, longitude, 1)
+//                        val addresslist = addresses
+//                        val address: String = addresslist[0].getAddressLine(0)
+//                        Log.d("add", address)
+//                    } catch (e: IOException) {
+//                        e.printStackTrace()
+//                    }
+
+
+
 
                     // Узнаем местоположение
                     // В этом месте часто исключение, как будто проблема с интернетом

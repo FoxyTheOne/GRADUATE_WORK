@@ -151,12 +151,21 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
         // PLAY URL (MP3), MEDIA PLAYER -> 2. Получаем AudioManager
         audioManager = context?.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
-        // 1. Подгрузить радиостанцию из Shared Preference, если она там сохранена. Если нет - текст "выберите радиостанцию"
-        viewModel.getStoredRadioStation()
-        // 2. Получаем радиостанцию из списка на предыдущей странице, если перешли сюда из списка радиостанций
-        arguments?.getParcelable<RadioStationPresentation>("radio_station")?.let { radioStation ->
-            Log.d(TAG, "Выбранный элемент списка: $radioStation")
-            viewModel.saveRadioStationAndShow(radioStation)
+//        // 1. Подгрузить радиостанцию из Shared Preference, если она там сохранена. Если нет - текст "выберите радиостанцию"
+//        viewModel.getStoredRadioStation()
+//        // 2. Получаем радиостанцию из списка на предыдущей странице, если перешли сюда из списка радиостанций
+//        arguments?.getParcelable<RadioStationPresentation>("radio_station")?.let { radioStation ->
+//            Log.d(TAG, "Выбранный элемент списка: $radioStation")
+//            viewModel.saveRadioStationAndShow(radioStation)
+//        }
+
+        if (arguments != null) {
+            arguments?.getParcelable<RadioStationPresentation>("radio_station")?.let { radioStation ->
+                Log.d(TAG, "Выбранный элемент списка: $radioStation")
+                viewModel.saveRadioStationAndShow(radioStation)
+            }
+        } else {
+            viewModel.getStoredRadioStation()
         }
 
         // GOOGLE MAPS -> 2.2. Obtain the SupportMapFragment and get notified when the map is ready to be used.
