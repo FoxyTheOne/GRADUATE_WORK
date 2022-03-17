@@ -49,8 +49,7 @@
                 android:layout_width="16dp"
                 android:layout_height="16dp"
                 android:layout_gravity="center"
-                android:layout_marginStart="@dimen/space_beforeOrAfterElement"
-                 />
+                android:layout_marginStart="@dimen/space_beforeOrAfterElement" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_radioStationTitle"
@@ -71,10 +70,10 @@
             android:gravity="start"
             android:orientation="vertical"
             android:paddingBottom="@dimen/space_beforeOrAfterElement"
+            app:layout_constraintBottom_toTopOf="@+id/linear_radioStationButtons"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/linear_radioStationDescription"
-            app:layout_constraintBottom_toTopOf="@+id/linear_radioStationButtons">
+            app:layout_constraintTop_toBottomOf="@+id/linear_radioStationDescription">
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_canTakeTime"
@@ -108,7 +107,7 @@
             android:paddingBottom="@dimen/space_beforeOrAfterElement"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/linear_canTakeTime" >
+            app:layout_constraintTop_toBottomOf="@+id/linear_canTakeTime">
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/button_addToFavorites"

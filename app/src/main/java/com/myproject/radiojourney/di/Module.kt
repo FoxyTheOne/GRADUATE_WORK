@@ -75,17 +75,17 @@ abstract class SingletonModule {
     @Singleton
     abstract fun bindsSharedPreference(
         appSharedPreference: AppSharedPreference
-    ) : IAppSharedPreference
+    ): IAppSharedPreference
 
     @Binds
     abstract fun bindsLocalRadioDataSource(
         localRadioDataSource: LocalRadioDataSource
-    ) : ILocalRadioDataSource
+    ): ILocalRadioDataSource
 
     @Binds
     abstract fun bindsNetworkRadioDataSource(
         networkRadioDataSource: NetworkRadioDataSource
-    ) : INetworkRadioDataSource
+    ): INetworkRadioDataSource
 
     @Binds
     abstract fun bindRadioServiceWrapper(
@@ -105,6 +105,7 @@ abstract class ViewModelModule {
             return appDatabase.getUserDAO()
         }
 
+        // Переношу следующие конструкторы в SingletonModule, т.к. их будет использовать Foreground service:
 //        @Provides
 //        fun providesCountryDAO(appDatabase: AppRoomDBAbstract): ICountryDAO {
 //            return appDatabase.getCountryDAO()
@@ -119,43 +120,44 @@ abstract class ViewModelModule {
     @Binds
     abstract fun bindsSignInInteractor(
         signInInteractor: SignInInteractor
-    ) : ISignInInteractor
+    ): ISignInInteractor
 
     @Binds
     abstract fun bindsSignUpInteractor(
         signUpInteractor: SignUpInteractor
-    ) : ISignUpInteractor
+    ): ISignUpInteractor
 
     @Binds
     abstract fun bindsLogOutInteractor(
         logOutInteractor: LogOutInteractor
-    ) : ILogOutInteractor
+    ): ILogOutInteractor
 
     @Binds
     abstract fun bindsHomeRadioInteractor(
         homeRadioInteractor: HomeRadioInteractor
-    ) : IHomeRadioInteractor
+    ): IHomeRadioInteractor
 
     @Binds
     abstract fun bindsRadioListInteractor(
         radioListInteractor: RadioListInteractor
-    ) : IRadioListInteractor
+    ): IRadioListInteractor
 
     @Binds
     abstract fun bindsAuthRepository(
         authRepository: AuthRepository
-    ) : IAuthRepository
+    ): IAuthRepository
 
     @Binds
     abstract fun bindsContentRepository(
         contentRepository: ContentRepository
-    ) : IContentRepository
+    ): IContentRepository
 
     @Binds
     abstract fun bindsLocalAuthDataSource(
         localAuthDataSource: LocalAuthDataSource
-    ) : ILocalAuthDataSource
+    ): ILocalAuthDataSource
 
+    // Переношу следующие конструкторы в SingletonModule, т.к. их будет использовать Foreground service:
 //    @Binds
 //    abstract fun bindsLocalRadioDataSource(
 //        localRadioDataSource: LocalRadioDataSource

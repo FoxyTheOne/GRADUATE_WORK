@@ -12,7 +12,7 @@ data class RadioStationLocal(
     @PrimaryKey
     @ColumnInfo(name = "url") val url: String,
     @ColumnInfo(name = "clickCount") val clickCount: Int,
-    @ColumnInfo(name = "countrycode") val countryCode : String
+    @ColumnInfo(name = "countrycode") val countryCode: String
 ) {
 
     companion object {
@@ -23,12 +23,13 @@ data class RadioStationLocal(
             countryCode = remote.countrycode
         )
 
-        fun fromPresentationToLocal(presentation: RadioStationPresentation): RadioStationLocal = RadioStationLocal(
-            stationName = presentation.stationName,
-            url = presentation.url,
-            clickCount = presentation.clickCount,
-            countryCode = presentation.countryCode
-        )
+        fun fromPresentationToLocal(presentation: RadioStationPresentation): RadioStationLocal =
+            RadioStationLocal(
+                stationName = presentation.stationName,
+                url = presentation.url,
+                clickCount = presentation.clickCount,
+                countryCode = presentation.countryCode
+            )
     }
 
 }

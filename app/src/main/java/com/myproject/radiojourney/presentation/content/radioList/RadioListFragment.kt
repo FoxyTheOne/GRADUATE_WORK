@@ -6,21 +6,16 @@ import android.util.Log
 import android.view.*
 import android.widget.FrameLayout
 import android.widget.ProgressBar
-import android.widget.Toast
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.myproject.radiojourney.IAppSettings
 import com.myproject.radiojourney.R
-import com.myproject.radiojourney.data.repository.ContentRepository
-import com.myproject.radiojourney.model.presentation.CountryPresentation
 import com.myproject.radiojourney.model.presentation.RadioStationPresentation
 import com.myproject.radiojourney.presentation.content.base.BaseContentFragmentAbstract
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -68,13 +63,11 @@ class RadioListFragment : BaseContentFragmentAbstract() {
         arguments?.getString("country_code")?.let { country_code_string ->
             val resultArray = country_code_string.split("||")
             countryCode = resultArray[0]
-//            viewModel.countryCode = resultArray[0]
             countryName = resultArray[1]
         }
         textRadioStationCity = view.findViewById(R.id.text_radioStationDialogCity)
         textRadioStationCity.text = countryName
         radioStationListRecyclerView = view.findViewById(R.id.recyclerView_radioStationList)
-//        radioStationListRecyclerView.adapter = RadioListAdapter(radioStationList)
 
         // Получаем список радиостанций, преобразуем. Сохранять в Room не будем. Радиостанций очень много, будет занимать много места на телефоне.
         // Кроме того, списки на сервере постоянно обновляются. Возможно какой-то радиостанции в списке уже не будет, а в локальной БД она ещё осталась. Пользователь выберет её и будет ошибка.
@@ -85,12 +78,7 @@ class RadioListFragment : BaseContentFragmentAbstract() {
         // Передайте ссылку на разметку
         dialogInternetTrouble.setContentView(R.layout.layout_internet_trouble_dialog)
 
-//        initListeners()
         subscribeOnLiveData()
-    }
-
-    private fun initListeners() {
-        TODO("Not yet implemented")
     }
 
     private fun subscribeOnLiveData() {

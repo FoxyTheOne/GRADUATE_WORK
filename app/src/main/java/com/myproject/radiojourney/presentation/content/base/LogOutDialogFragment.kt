@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.DialogFragment
 import com.myproject.radiojourney.R
-import com.myproject.radiojourney.presentation.content.base.ILogOutListener
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -23,7 +22,11 @@ class LogOutDialogFragment : DialogFragment() {
         this.listener = listener
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return inflater.inflate(R.layout.layout_logout_dialog, container, false)
     }
 

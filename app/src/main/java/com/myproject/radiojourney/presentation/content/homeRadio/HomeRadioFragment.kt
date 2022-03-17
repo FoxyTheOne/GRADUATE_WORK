@@ -3,17 +3,12 @@ package com.myproject.radiojourney.presentation.content.homeRadio
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
-import android.content.Context.AUDIO_SERVICE
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.location.Location
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
-import android.media.MediaPlayer.MEDIA_ERROR_SERVER_DIED
-import android.media.MediaRecorder.MEDIA_ERROR_SERVER_DIED
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -42,15 +37,9 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener
 import com.myproject.radiojourney.model.presentation.RadioStationPresentation
-import com.myproject.radiojourney.utils.service.ProgressForegroundService
 import android.widget.Toast
-import androidx.core.content.ContextCompat.getSystemService
-import androidx.core.content.PackageManagerCompat
-import androidx.core.content.PackageManagerCompat.LOG_TAG
 import java.io.IOException
 import java.lang.Exception
-import androidx.core.content.PackageManagerCompat.LOG_TAG
-
 
 /**
  * Главная страница.
@@ -151,20 +140,15 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
         // PLAY URL (MP3), MEDIA PLAYER -> 2. Получаем AudioManager
         audioManager = context?.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
-//        // 1. Подгрузить радиостанцию из Shared Preference, если она там сохранена. Если нет - текст "выберите радиостанцию"
-//        viewModel.getStoredRadioStation()
-//        // 2. Получаем радиостанцию из списка на предыдущей странице, если перешли сюда из списка радиостанций
-//        arguments?.getParcelable<RadioStationPresentation>("radio_station")?.let { radioStation ->
-//            Log.d(TAG, "Выбранный элемент списка: $radioStation")
-//            viewModel.saveRadioStationAndShow(radioStation)
-//        }
-
         if (arguments != null) {
-            arguments?.getParcelable<RadioStationPresentation>("radio_station")?.let { radioStation ->
-                Log.d(TAG, "Выбранный элемент списка: $radioStation")
-                viewModel.saveRadioStationAndShow(radioStation)
-            }
+            // 2. Получаем радиостанцию из списка на предыдущей странице, если перешли сюда из списка радиостанций
+            arguments?.getParcelable<RadioStationPresentation>("radio_station")
+                ?.let { radioStation ->
+                    Log.d(TAG, "Выбранный элемент списка: $radioStation")
+                    viewModel.saveRadioStationAndShow(radioStation)
+                }
         } else {
+            // 1. Подгрузить радиостанцию из Shared Preference, если она там сохранена. Если нет - текст "выберите радиостанцию"
             viewModel.getStoredRadioStation()
         }
 
@@ -214,13 +198,9 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
         subscribeOnLiveData()
 
         // COUNTRY LIST MARKERS ON MAP -> 1. Получаем список кодов стран, преобразуем в локальные модели, сохраняем в Room.
-//        viewModel.getCountryListAndSaveToRoom()
-        requireContext().startService(
-            Intent(
-                requireContext(),
-                ProgressForegroundService::class.java
-            )
-        )
+        // Будем делать эту работу в foreground service, чтобы отображать уведомление прогресса.
+        // !!! Запустить нужно только 1 раз, при запуске программы, затем stopSelf() и больше этот сервис не запускать. Поэтому вызываем сервис из MainActivity
+
         // COUNTRY LIST MARKERS ON MAP -> 2. Затем подписываемся на локальную БД с помощью CountryListFlow (либо CountryListLiveData)
         subscribeOnFlow()
     }
@@ -279,25 +259,7 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
                 textRadioStationTitle.text = radioStationPresentation.stationName
                 audioUrl = radioStationPresentation.url
                 isStationSelected = true
-                // TODO метод (проигрывать радиостанцию и ставить на паузу)
             })
-
-//        // ???
-//        viewModel.isRadioPlayingLiveData.observe(viewLifecycleOwner, {
-//            Toast.makeText(context, "Audio started playing", Toast.LENGTH_SHORT).show()
-//        })
-//        viewModel.isUrlEmptyLiveData.observe(viewLifecycleOwner, {
-//            Toast.makeText(
-//                context,
-//                "Failed to connect. Try again or select another one",
-//                Toast.LENGTH_SHORT
-//            ).show()
-//            isPaused = true
-//            imagePlay.setImageResource(R.drawable.play_white)
-//        })
-//        viewModel.isRadioStoppedLiveData.observe(viewLifecycleOwner, {
-//            Toast.makeText(context, "Audio has been paused", Toast.LENGTH_SHORT).show();
-//        })
     }
 
     private fun subscribeOnFlow() {
@@ -323,7 +285,6 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
             }
         }
     }
-
 
     // PLAY URL (MP3), MEDIA PLAYER -> 3. Метод для запуска проигрывания.
     private fun playAudio() {
@@ -412,71 +373,13 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
         imagePlay.setImageResource(R.drawable.play_white)
         isPaused = true
 
-        mediaPlayer?.stop() // Останавливает проигрывание
+        mediaPlayer?.let {
+            if (it.isPlaying){
+                it.stop() // Останавливает проигрывание
+            }
+        }
         releaseMediaPlayer()
     }
-
-
-//    // PLAY URL -> 4. MediaPlayer play url
-//    private fun playAudio() {
-//        if (audioUrl.isNotBlank()) {
-//            // initializing media player
-//            mediaPlayer = MediaPlayer()
-//
-//            // below line is use to set the audio stream type for our media player.
-//
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//                mediaPlayer!!.setAudioAttributes(
-//                    AudioAttributes.Builder()
-//                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-//                        .build()
-//                )
-//            } else {
-//                mediaPlayer!!.setAudioStreamType(AudioManager.STREAM_MUSIC)
-//            }
-//
-//            // below line is use to set our url to our media player.
-//            try {
-//                mediaPlayer!!.setDataSource(audioUrl)
-//                // below line is use to prepare and start our media player.
-//                mediaPlayer!!.prepare()
-//                mediaPlayer!!.start()
-//            } catch (e: IOException) {
-//                e.printStackTrace()
-//            }
-//            // below line is use to display a toast message.
-//            Toast.makeText(context, "Audio started playing", Toast.LENGTH_SHORT).show()
-//        } else {
-//            Toast.makeText(context, "Radio url is empty", Toast.LENGTH_SHORT).show()
-//        }
-//    }
-
-//    private fun stopAudio() {
-//        // checking the media player if the audio is playing or not.
-//        mediaPlayer?.let { nonNullMediaPlayer ->
-//            if (nonNullMediaPlayer.isPlaying) {
-//                // pausing the media player
-//                // if media player is playing we are calling below line to stop our media player.
-//                nonNullMediaPlayer.stop()
-//                nonNullMediaPlayer.reset()
-//                nonNullMediaPlayer.release()
-//
-//                // below line is to display a message when media player is paused.
-//                Toast.makeText(
-//                    context,
-//                    "Audio has been paused",
-//                    Toast.LENGTH_SHORT
-//                ).show();
-//            } else {
-//                // this method is called when media player is not playing.
-//                Toast.makeText(
-//                    context,
-//                    "Audio has not played",
-//                    Toast.LENGTH_SHORT
-//                ).show();
-//            }
-//        }
-//    }
 
     private fun showProgress() {
         frameLayout.isVisible = true
@@ -589,7 +492,7 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
             val marker = mMap.addMarker(
                 MarkerOptions()
                     .title(countryPresentation.countryName)
-                    .snippet("Список радиостанций (${countryPresentation.stationcount})")
+                    .snippet("Список радиостанций (${countryPresentation.stationCount})")
                     .position(countryPresentation.countryLocation)
                     .icon(BitmapDescriptorFactory.fromBitmap(customBitmapMarker))
             )

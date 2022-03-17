@@ -1,6 +1,5 @@
 package com.myproject.radiojourney.data.localDatabaseRoom
 
-import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters

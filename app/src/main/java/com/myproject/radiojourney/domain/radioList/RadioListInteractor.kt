@@ -1,14 +1,7 @@
 package com.myproject.radiojourney.domain.radioList
 
-import android.util.Log
-import com.myproject.radiojourney.data.repository.ContentRepository
 import com.myproject.radiojourney.domain.iRepository.IContentRepository
-import com.myproject.radiojourney.model.local.RadioStationLocal
 import com.myproject.radiojourney.model.presentation.RadioStationPresentation
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 /**
@@ -26,7 +19,8 @@ class RadioListInteractor @Inject constructor(
         val radioStationPresentationList = mutableListOf<RadioStationPresentation>()
 
         radioStationLocalList.forEach { radioStationLocal ->
-            val radioStationPresentation = RadioStationPresentation.fromLocalToPresentation(radioStationLocal)
+            val radioStationPresentation =
+                RadioStationPresentation.fromLocalToPresentation(radioStationLocal)
             radioStationPresentationList.add(radioStationPresentation)
         }
 

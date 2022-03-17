@@ -1,16 +1,9 @@
 package com.myproject.radiojourney.presentation.content.homeRadio
 
-import android.media.AudioAttributes
-import android.media.AudioManager
-import android.media.MediaPlayer
-import android.net.Uri
-import android.os.Build
 import android.util.Log
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import com.myproject.radiojourney.domain.homeRadio.IHomeRadioInteractor
 import com.myproject.radiojourney.domain.logOut.ILogOutInteractor
 import com.myproject.radiojourney.utils.extension.call
@@ -18,7 +11,6 @@ import com.myproject.radiojourney.model.presentation.RadioStationPresentation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.IOException
 import javax.inject.Inject
 
 /**
@@ -32,10 +24,6 @@ class HomeRadioViewModel @Inject constructor(
     companion object {
         private const val TAG = "HomeRadioViewModel"
     }
-//    // ???
-//    val isRadioPlayingLiveData = MutableLiveData<Boolean>()
-//    val isRadioStoppedLiveData = MutableLiveData<Boolean>()
-//    val isUrlEmptyLiveData = MutableLiveData<Boolean>()
 
     // Подписка на локальную БД
     val countryListFlow = homeRadioInteractor.subscribeOnCountryList()
@@ -56,18 +44,6 @@ class HomeRadioViewModel @Inject constructor(
             hideProgressLiveData.call()
         }
     }
-
-//    fun getCountryListAndSaveToRoom() {
-//        viewModelScope.launch(Dispatchers.IO) {
-//            try {
-//                homeRadioInteractor.getCountryListAndSaveToRoom()
-//            } catch (e: IOException) {
-//                Log.d(TAG, "Exception: ${e.message}")
-//                dialogInternetTroubleLiveData.call()
-//                hideProgressLiveData.call()
-//            }
-//        }
-//    }
 
     // Подгрузить радиостанцию из Shared Preference, если она там сохранена. Если нет - текст "выберите радиостанцию"
     fun getStoredRadioStation() {

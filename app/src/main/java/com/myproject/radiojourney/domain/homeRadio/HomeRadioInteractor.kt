@@ -1,7 +1,6 @@
 package com.myproject.radiojourney.domain.homeRadio
 
 import com.myproject.radiojourney.domain.iRepository.IContentRepository
-import com.myproject.radiojourney.model.local.CountryLocal
 import com.myproject.radiojourney.model.local.RadioStationLocal
 import com.myproject.radiojourney.model.presentation.CountryPresentation
 import com.myproject.radiojourney.model.presentation.RadioStationPresentation
@@ -19,9 +18,6 @@ import javax.inject.Inject
 class HomeRadioInteractor @Inject constructor(
     private val contentRepository: IContentRepository
 ) : IHomeRadioInteractor {
-//    override suspend fun getCountryListAndSaveToRoom() =
-//        contentRepository.getCountryListAndSaveToRoom()
-
     // local -> presentation
     // Оператор .map помогает перехватить данные и преобразовать их
     override fun subscribeOnCountryList(): Flow<List<CountryPresentation>> =
@@ -55,6 +51,9 @@ class HomeRadioInteractor @Inject constructor(
         return radioStationPresentationSaved
     }
 
-    override suspend fun saveRadioStationUrl(isStored: Boolean, radioStation: RadioStationPresentation) =
+    override suspend fun saveRadioStationUrl(
+        isStored: Boolean,
+        radioStation: RadioStationPresentation
+    ) =
         contentRepository.saveRadioStationUrl(isStored, radioStation)
 }

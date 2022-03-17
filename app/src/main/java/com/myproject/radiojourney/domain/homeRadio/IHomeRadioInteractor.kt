@@ -5,7 +5,6 @@ import com.myproject.radiojourney.model.presentation.RadioStationPresentation
 import kotlinx.coroutines.flow.Flow
 
 interface IHomeRadioInteractor {
-//    suspend fun getCountryListAndSaveToRoom()
     fun subscribeOnCountryList(): Flow<List<CountryPresentation>>
 
     suspend fun isRadioStationStored(): Boolean

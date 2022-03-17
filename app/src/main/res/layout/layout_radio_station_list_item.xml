@@ -9,7 +9,7 @@
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_radioStationName"
-        style="@style/login_bottom"
+        style="@style/login_bottom_orange"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingStart="@dimen/space_beforeOrAfterElement"
@@ -24,7 +24,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_radioStationClickCount"
-            style="@style/login_bottom_orange"
+            style="@style/login_bottom"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="@dimen/space_beforeOrAfterElement"
@@ -32,7 +32,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_radioStationClickCount2"
-            style="@style/login_bottom_orange"
+            style="@style/login_bottom"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="@dimen/space_beforeOrAfterElement"

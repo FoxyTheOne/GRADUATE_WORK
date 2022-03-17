@@ -25,12 +25,7 @@ import kotlinx.coroutines.launch
 import java.io.IOException
 import java.util.*
 import javax.inject.Inject
-import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
-import com.myproject.radiojourney.MainActivity
-
-
-
 
 /**
  * Создадим Foreground Service
@@ -41,7 +36,6 @@ class ProgressForegroundService @Inject constructor() : Service() {
     companion object {
         private const val TAG = "ProgressForeground"
         private const val CHANNEL_CASHING_ID = "CHANNEL_CASHING_ID" // 5
-        private const val CHANNEL_CASHING_FAILED_ID = "CHANNEL_CASHING_FAILED_ID" // 6
     }
 
     @Inject
@@ -83,18 +77,6 @@ class ProgressForegroundService @Inject constructor() : Service() {
 
         // 4.3. И далее вызываем метод, который будет обновлять наш notification
         updateProgress(this)
-
-
-//        // NOTIFICATION -> 1. Notification for minimum target API level is 4+
-//        notificationBuilder2 = NotificationCompat.Builder(this, CHANNEL_CASHING_FAILED_ID)
-//            .setSmallIcon(R.drawable.ic_launcher_foreground)
-//            .setContentTitle(getString(R.string.foregroundNotification_failedName))
-//            .setContentText(getString(R.string.foregroundNotification_name))
-//
-//        val targetIntent = Intent(this, HomeRadioFragment::class.java)
-//        val contentIntent =
-//            PendingIntent.getActivity(this, 0, targetIntent, PendingIntent.FLAG_CANCEL_CURRENT)
-//        notificationBuilder2?.setContentIntent(contentIntent)
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -163,7 +145,6 @@ class ProgressForegroundService @Inject constructor() : Service() {
                     val countryName = loc.displayName
 
 
-
 //                    try {
 //                        val geocoder = Geocoder(this@MainActivity, Locale.getDefault())
 //                        val addresses: List<*> = geocoder.getFromLocation(latitude, longitude, 1)
@@ -173,8 +154,6 @@ class ProgressForegroundService @Inject constructor() : Service() {
 //                    } catch (e: IOException) {
 //                        e.printStackTrace()
 //                    }
-
-
 
 
                     // Узнаем местоположение
@@ -207,27 +186,23 @@ class ProgressForegroundService @Inject constructor() : Service() {
                     }
                 }
 
-                    Log.d(
-                        TAG,
-                        "Успешное преобразование стран. Получен результат [0]: ${countryLocalList[0]}"
-                    )
+                Log.d(
+                    TAG,
+                    "Успешное преобразование стран. Получен результат [0]: ${countryLocalList[0]}"
+                )
 
                 // Теперь сохраним наши страны в Room
                 localRadioDataSource.saveCountryList(countryLocalList)
 
-
                 // 5.4. Когда прогресс заканчивается, закрываем Foreground, удаляем уведомления, stop service
                 stopForeground(true)
                 notificationManager.cancelAll()
-//            stopSelf() -> Не убиваю сервис, чтобы не запускался запрос при каждом переходе на главную страницу.
+                stopSelf()
             } catch (e: IOException) {
                 Log.d(
                     TAG,
                     "Exception: ${e.message}. Please, try turn on and then turn off airplane mode (on the emulator). And then restart the program, if needed."
                 )
-//                // NOTIFICATION -> 2. Notification for minimum target API level is 4+
-//                val nManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-//                nManager.notify(6, notificationBuilder2?.build())
                 // TODO сброс и перезапуск кеширования
             }
         }

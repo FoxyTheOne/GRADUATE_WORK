@@ -98,7 +98,10 @@ class AppSharedPreference @Inject constructor(@ApplicationContext context: Conte
             PREFERENCE_IS_RADIO_STATION_STORED,
             isStored
         )?.apply()
-        Log.d(TAG, "Сохранено в AppSharedPreference: PREFERENCE_IS_RADIO_STATION_STORED = $isStored")
+        Log.d(
+            TAG,
+            "Сохранено в AppSharedPreference: PREFERENCE_IS_RADIO_STATION_STORED = $isStored"
+        )
     }
 
     override fun isRadioStationStored(): Boolean {
