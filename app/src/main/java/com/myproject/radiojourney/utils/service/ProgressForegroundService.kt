@@ -1,5 +1,6 @@
 package com.myproject.radiojourney.utils.service
 
+import android.app.Dialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
@@ -17,15 +18,12 @@ import com.myproject.radiojourney.R
 import com.myproject.radiojourney.data.dataSource.local.radio.ILocalRadioDataSource
 import com.myproject.radiojourney.data.dataSource.network.INetworkRadioDataSource
 import com.myproject.radiojourney.model.local.CountryLocal
+import com.myproject.radiojourney.presentation.content.homeRadio.HomeRadioFragment
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.io.IOException
 import java.util.*
 import javax.inject.Inject
-import androidx.appcompat.app.AlertDialog
 
 /**
  * Создадим Foreground Service
@@ -45,13 +43,17 @@ class ProgressForegroundService @Inject constructor() : Service() {
     lateinit var localRadioDataSource: ILocalRadioDataSource
 
     private var notificationBuilder: NotificationCompat.Builder? = null
-    private var notificationBuilder2: NotificationCompat.Builder? = null
-    private lateinit var alertDialog: AlertDialog
+    private lateinit var dialogInternetTrouble: Dialog
     private val serviceJob = Job()
     private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
 
     override fun onCreate() {
         super.onCreate()
+
+        // Настройки диалогового окна
+        dialogInternetTrouble = Dialog(this)
+        // Передайте ссылку на разметку
+        dialogInternetTrouble.setContentView(R.layout.layout_internet_trouble_dialog)
 
         // FOREGROUND_SERVICE -> 3. Вызываем метод для создания Channel
         // Добавляем проверку, т.к. создавать NotificationChannel можно только начиная с API 26
@@ -128,44 +130,61 @@ class ProgressForegroundService @Inject constructor() : Service() {
                 // Получаем список кодов стран из networkRadioDataSource
                 val countryCodeRemoteList = networkRadioDataSource.getCountryCodeList()
 
+                // Для отображения прогресса
                 val listSize = countryCodeRemoteList.size
+//                val incrementProgress25 = listSize / 4
+//                val incrementProgress50 = listSize / 2
+//                val incrementProgress75 = listSize / 4 * 3
 
                 // Преобразуем коды (remote) в читабельные страны (local) с локацией
                 val countryLocalList = mutableListOf<CountryLocal>()
 
                 val geocoder = Geocoder(context)
                 var addresses = mutableListOf<Address>()
+                var latitude = 0.0
+                var longitude = 0.0
 
                 var countryCodeRemoteCount = 0
                 countryCodeRemoteList.forEach { countryCodeRemote ->
                     countryCodeRemoteCount += 1
 
+//                    when (countryCodeRemoteCount) {
+//                        1 -> sendBroadcast(Intent().apply {
+//                            action = HomeRadioFragment.BROADCAST_UPDATE_CONTENT
+//                            putExtra(HomeRadioFragment.BROADCAST_INCREMENT_PROGRESS_1, 1)
+//                        })
+//                        incrementProgress25 -> sendBroadcast(Intent().apply {
+//                            action = HomeRadioFragment.BROADCAST_UPDATE_CONTENT
+//                            putExtra(HomeRadioFragment.BROADCAST_INCREMENT_PROGRESS_25, 25)
+//                        })
+//                        incrementProgress50 -> sendBroadcast(Intent().apply {
+//                            action = HomeRadioFragment.BROADCAST_UPDATE_CONTENT
+//                            putExtra(HomeRadioFragment.BROADCAST_INCREMENT_PROGRESS_50, 50)
+//                        })
+//                        incrementProgress75 -> sendBroadcast(Intent().apply {
+//                            action = HomeRadioFragment.BROADCAST_UPDATE_CONTENT
+//                            putExtra(HomeRadioFragment.BROADCAST_INCREMENT_PROGRESS_75, 75)
+//                        })
+//                        listSize -> sendBroadcast(Intent().apply {
+//                            action = HomeRadioFragment.BROADCAST_UPDATE_CONTENT
+//                            putExtra(HomeRadioFragment.BROADCAST_INCREMENT_PROGRESS_FINISH, 100)
+//                        })
+//                    }
+
                     // Узнаем название страны
                     val loc: Locale = Locale("", countryCodeRemote.name)
                     val countryName = loc.displayName
 
-
-//                    try {
-//                        val geocoder = Geocoder(this@MainActivity, Locale.getDefault())
-//                        val addresses: List<*> = geocoder.getFromLocation(latitude, longitude, 1)
-//                        val addresslist = addresses
-//                        val address: String = addresslist[0].getAddressLine(0)
-//                        Log.d("add", address)
-//                    } catch (e: IOException) {
-//                        e.printStackTrace()
-//                    }
-
-
                     // Узнаем местоположение
                     // В этом месте часто исключение, как будто проблема с интернетом
+                    Log.d(TAG, "Starting geocoder")
+
                     addresses = geocoder.getFromLocationName(countryName, 1)
-                    var latitude: Double = 0.0
-                    var longitude: Double = 0.0
                     if (addresses.size > 0) {
                         latitude = addresses[0].latitude;
                         longitude = addresses[0].longitude;
                     }
-                    Log.d(TAG, "результат addresses: $latitude, $longitude")
+//                    Log.d(TAG, "результат addresses: $latitude, $longitude")
 
                     // remote -> local
                     val countryLocal = CountryLocal.fromRemoteToLocal(
@@ -174,6 +193,8 @@ class ProgressForegroundService @Inject constructor() : Service() {
                         countryLocation = LatLng(latitude, longitude)
                     )
                     countryLocalList.add(countryLocal)
+
+                    Log.d(TAG, "End of geocoding")
 
                     // Если notificationBuilder != null
                     notificationBuilder?.let { builder ->
@@ -203,7 +224,16 @@ class ProgressForegroundService @Inject constructor() : Service() {
                     TAG,
                     "Exception: ${e.message}. Please, try turn on and then turn off airplane mode (on the emulator). And then restart the program, if needed."
                 )
-                // TODO сброс и перезапуск кеширования
+                e.printStackTrace()
+
+                // TODO notification "Cashing failed"
+//                serviceScope.launch(Dispatchers.Main) {
+//                    dialogInternetTrouble.show()
+//                }
+
+                stopForeground(true)
+                notificationManager.cancelAll()
+                stopSelf()
             }
         }
     }

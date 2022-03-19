@@ -38,6 +38,8 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener
 import com.myproject.radiojourney.model.presentation.RadioStationPresentation
 import android.widget.Toast
+import androidx.appcompat.widget.AppCompatButton
+import kotlinx.coroutines.*
 import java.io.IOException
 import java.lang.Exception
 
@@ -58,6 +60,16 @@ import java.lang.Exception
 class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
     companion object {
         private const val TAG = "HomeRadioFragment"
+
+//        // Фильтр для нашего Broadcast
+//        const val BROADCAST_UPDATE_CONTENT = "BROADCAST_UPDATE_CONTENT"
+//
+//        // Фильтры для контента:
+//        const val BROADCAST_INCREMENT_PROGRESS_1 = "BROADCAST_INCREMENT_PROGRESS_1"
+//        const val BROADCAST_INCREMENT_PROGRESS_25 = "BROADCAST_INCREMENT_PROGRESS_25"
+//        const val BROADCAST_INCREMENT_PROGRESS_50 = "BROADCAST_INCREMENT_PROGRESS_50"
+//        const val BROADCAST_INCREMENT_PROGRESS_75 = "BROADCAST_INCREMENT_PROGRESS_75"
+//        const val BROADCAST_INCREMENT_PROGRESS_FINISH = "BROADCAST_INCREMENT_PROGRESS_FINISH"
     }
 
     @Inject
@@ -71,6 +83,9 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
     private lateinit var textLoadingData: AppCompatTextView
     private lateinit var imagePlay: AppCompatImageView
     private var isPaused = true
+    private lateinit var buttonAddToFavorites: AppCompatButton
+    private lateinit var buttonGoToFavorites: AppCompatButton
+    private lateinit var imageStar: AppCompatImageView
 
     // PLAY URL (MP3), MEDIA PLAYER -> 1. Создаём переменные
     // MediaPlayer – класс, который позволит вам проигрывать аудио/видео файлы с возможностью сделать паузу и перемотать в нужную позицию.
@@ -95,6 +110,10 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
     private lateinit var buttonZoomPlus: Button
     private lateinit var buttonZoomMinus: Button
     private lateinit var buttonYouAreHere: Button
+
+//    // Для горизонтальной полосы прогресса (данные из broadcast receiver)
+//    private var myBroadcastReceiver: MyBroadcastReceiver? = null
+//    private lateinit var progressHorizontal: ProgressBar
 
     //    // ADD MARKERS TO MAP -> 1. Для примера, сейчас. Потом подгружать список по запросу
 //    private val places: List<Place> = listOf(
@@ -121,6 +140,11 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
         textLoadingData = view.findViewById(R.id.text_loadingData)
         imagePlay = view.findViewById(R.id.image_play)
         imagePlay.setImageResource(R.drawable.play_white)
+        buttonAddToFavorites = view.findViewById(R.id.button_addToFavorites)
+        buttonGoToFavorites = view.findViewById(R.id.button_goToFavorites)
+        imageStar = view.findViewById(R.id.image_star)
+        imageStar.setImageResource(R.drawable.star_transparent)
+//        progressHorizontal = view.findViewById(R.id.progress_horizontal)
         // LOCATION -> 1.4. Получим наш FusedLocationProviderClient. Именно он имеет в себе методы, с помощью которых мы можем определить локацию
         fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(requireContext())
@@ -151,6 +175,13 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
             // 1. Подгрузить радиостанцию из Shared Preference, если она там сохранена. Если нет - текст "выберите радиостанцию"
             viewModel.getStoredRadioStation()
         }
+
+//        // SEND SIMPLE Int -> 1.3. Зарегистрируем наш BroadcastReceiver и его intent фильтр
+//        myBroadcastReceiver = MyBroadcastReceiver()
+//        requireActivity().registerReceiver(
+//            myBroadcastReceiver,
+//            IntentFilter(BROADCAST_UPDATE_CONTENT)
+//        )
 
         // GOOGLE MAPS -> 2.2. Obtain the SupportMapFragment and get notified when the map is ready to be used.
         // Необходимо найти supportFragmentManager в списке всех фрагментов
@@ -240,6 +271,21 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
                 }
             }
         }
+        imageStar.setOnClickListener {
+            val currentRadioStation = viewModel.radioStationSavedLiveData.value
+            currentRadioStation?.let {
+                viewModel.checkIsStationInFavouritesAndChangeTheStar(it)
+            }
+        }
+        buttonAddToFavorites.setOnClickListener {
+            if (isStationSelected) {
+                val currentRadioStation = viewModel.radioStationSavedLiveData.value
+                currentRadioStation?.let {
+                    viewModel.addStationToFavourites(it)
+                }
+            }
+        }
+        buttonGoToFavorites.setOnClickListener { }
     }
 
     private fun subscribeOnLiveData() {
@@ -260,6 +306,18 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
                 audioUrl = radioStationPresentation.url
                 isStationSelected = true
             })
+        viewModel.addStationToFavouritesFailedLiveData.observe(viewLifecycleOwner, {
+            Toast.makeText(context, "Interacting with favourites failed. Smth wrong with your token. Try re-login.", Toast.LENGTH_LONG).show()
+        })
+        viewModel.failedLiveData.observe(viewLifecycleOwner, {
+            Toast.makeText(context, "Failure. Something went wrong", Toast.LENGTH_LONG).show()
+        })
+        viewModel.stationSavedInFavouritesLiveData.observe(viewLifecycleOwner, {
+            imageStar.setImageResource(R.drawable.star)
+        })
+        viewModel.stationDeletedFromFavouritesLiveData.observe(viewLifecycleOwner, {
+            imageStar.setImageResource(R.drawable.star_transparent)
+        })
     }
 
     private fun subscribeOnFlow() {
@@ -336,6 +394,7 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
                 })
                 prepareAsync() // might take long! (for buffering, etc)
                 setOnErrorListener(MediaPlayer.OnErrorListener { mp, what, extra ->
+                    Toast.makeText(context, "Failed to connect.", Toast.LENGTH_SHORT).show()
                     stopAudio()
                     Log.d(TAG, "PLAY URL (MP3), MEDIA PLAYER -> setOnErrorListener $what $extra")
                     true
@@ -374,7 +433,7 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
         isPaused = true
 
         mediaPlayer?.let {
-            if (it.isPlaying){
+            if (it.isPlaying) {
                 it.stop() // Останавливает проигрывание
             }
         }
@@ -570,7 +629,31 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
 
     // PLAY URL (MP3), MEDIA PLAYER -> 6. В методе onDestroy обязательно освобождаем ресурсы проигрывателя
     override fun onDestroy() {
-        super.onDestroy()
+//        context?.unregisterReceiver(myBroadcastReceiver)
         releaseMediaPlayer()
+        super.onDestroy()
     }
+
+//    inner class MyBroadcastReceiver : BroadcastReceiver() {
+//        override fun onReceive(context: Context?, intent: Intent?) {
+//            progressHorizontal.isVisible = true
+//
+//            val progress1 = intent?.getIntExtra(BROADCAST_INCREMENT_PROGRESS_1, 0) ?: 0
+//            progressHorizontal.incrementProgressBy(progress1)
+//
+//            val progress25 = intent?.getIntExtra(BROADCAST_INCREMENT_PROGRESS_25, 0) ?: 0
+//            progressHorizontal.incrementProgressBy(progress25)
+//
+//            val progress50 = intent?.getIntExtra(BROADCAST_INCREMENT_PROGRESS_50, 0) ?: 0
+//            progressHorizontal.incrementProgressBy(progress50)
+//
+//            val progress75 = intent?.getIntExtra(BROADCAST_INCREMENT_PROGRESS_75, 0) ?: 0
+//            progressHorizontal.incrementProgressBy(progress75)
+//
+//            val progressFinish = intent?.getIntExtra(BROADCAST_INCREMENT_PROGRESS_FINISH, 0) ?: 0
+//            progressHorizontal.incrementProgressBy(progressFinish)
+//
+//            progressHorizontal.isVisible = false
+//        }
+//    }
 }

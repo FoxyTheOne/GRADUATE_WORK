@@ -11,10 +11,7 @@ import com.myproject.radiojourney.data.dataSource.network.INetworkRadioDataSourc
 import com.myproject.radiojourney.data.dataSource.network.NetworkRadioDataSource
 import com.myproject.radiojourney.data.dataSource.network.service.IRadioServiceWrapper
 import com.myproject.radiojourney.data.dataSource.network.service.RadioServiceWrapper
-import com.myproject.radiojourney.data.localDatabaseRoom.AppRoomDBAbstract
-import com.myproject.radiojourney.data.localDatabaseRoom.ICountryDAO
-import com.myproject.radiojourney.data.localDatabaseRoom.IRadioStationDAO
-import com.myproject.radiojourney.data.localDatabaseRoom.IUserDAO
+import com.myproject.radiojourney.data.localDatabaseRoom.*
 import com.myproject.radiojourney.data.repository.AuthRepository
 import com.myproject.radiojourney.data.repository.ContentRepository
 import com.myproject.radiojourney.data.sharedPreference.AppSharedPreference
@@ -69,6 +66,11 @@ abstract class SingletonModule {
         fun providesRadioStationDAO(appDatabase: AppRoomDBAbstract): IRadioStationDAO {
             return appDatabase.getRadioStationDAO()
         }
+
+        @Provides
+        fun providesRadioStationFavouriteDAO(appDatabase: AppRoomDBAbstract): IRadioStationFavouriteDAO {
+            return appDatabase.getRadioStationFavouriteDAO()
+        }
     }
 
     @Binds
@@ -114,6 +116,11 @@ abstract class ViewModelModule {
 //        @Provides
 //        fun providesRadioStationDAO(appDatabase: AppRoomDBAbstract): IRadioStationDAO {
 //            return appDatabase.getRadioStationDAO()
+//        }
+
+//        @Provides
+//        fun providesRadioStationFavouriteDAO(appDatabase: AppRoomDBAbstract): IRadioStationFavouriteDAO {
+//            return appDatabase.getRadioStationFavouriteDAO()
 //        }
     }
 

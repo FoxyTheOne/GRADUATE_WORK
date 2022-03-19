@@ -11,6 +11,7 @@ import com.myproject.radiojourney.model.presentation.RadioStationPresentation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.IOException
 import javax.inject.Inject
 
 /**
@@ -24,6 +25,7 @@ class HomeRadioViewModel @Inject constructor(
     companion object {
         private const val TAG = "HomeRadioViewModel"
     }
+    val failedLiveData = MutableLiveData<Boolean>()
 
     // Подписка на локальную БД
     val countryListFlow = homeRadioInteractor.subscribeOnCountryList()
@@ -37,6 +39,11 @@ class HomeRadioViewModel @Inject constructor(
     // LiveData для открытия диалогового окна
     val dialogInternetTroubleLiveData = MutableLiveData<Boolean>()
 
+    // Favourites
+    val addStationToFavouritesFailedLiveData = MutableLiveData<Boolean>()
+    val stationSavedInFavouritesLiveData = MutableLiveData<Boolean>()
+    val stationDeletedFromFavouritesLiveData = MutableLiveData<Boolean>()
+
     fun logout() {
         viewModelScope.launch(Dispatchers.IO) {
             showProgressLiveData.call()
@@ -48,28 +55,39 @@ class HomeRadioViewModel @Inject constructor(
     // Подгрузить радиостанцию из Shared Preference, если она там сохранена. Если нет - текст "выберите радиостанцию"
     fun getStoredRadioStation() {
         viewModelScope.launch(Dispatchers.IO) {
-            // Узнаём, была ли ранее сохнанена радиостанция
-            val isRadioStationStored = homeRadioInteractor.isRadioStationStored()
-            Log.d(
-                TAG,
-                "Узнали, была ли сохранена радиостанция: $isRadioStationStored"
-            )
-            // Если да - выводим её на экран
-            if (isRadioStationStored) {
-                // Узнаём URL
-                val radioStationUrl: String =
-                    homeRadioInteractor.getRadioStationUrl().toString()
-                // Находим в Room
-                val radioStationSaved: RadioStationPresentation? =
-                    homeRadioInteractor.getRadioStationSaved(radioStationUrl)
-                // Если всё ок - подгружаем
-                radioStationSaved?.let { nonNullRadioStation ->
-                    Log.d(
-                        TAG,
-                        "Передаются значения в LiveData: nonNullRadioStation = $nonNullRadioStation"
-                    )
-                    radioStationSavedLiveData.postValue(nonNullRadioStation)
+            try {
+                // Узнаём, была ли ранее сохнанена радиостанция
+                val isRadioStationStored = homeRadioInteractor.isRadioStationStored()
+                Log.d(
+                    TAG,
+                    "Узнали, была ли сохранена радиостанция: $isRadioStationStored"
+                )
+                // Если да - выводим её на экран
+                if (isRadioStationStored) {
+                    // Узнаём URL
+                    val radioStationUrl: String =
+                        homeRadioInteractor.getRadioStationUrl().toString()
+                    // Находим в Room
+                    val radioStationSaved: RadioStationPresentation? =
+                        homeRadioInteractor.getRadioStationSaved(radioStationUrl)
+                    // Если всё ок - подгружаем
+                    radioStationSaved?.let { nonNullRadioStation ->
+                        Log.d(
+                            TAG,
+                            "Передаются значения в LiveData: nonNullRadioStation = $nonNullRadioStation"
+                        )
+                        radioStationSavedLiveData.postValue(nonNullRadioStation)
+                        // Favourites
+                        val isStationInFavourites =
+                            homeRadioInteractor.isStationInFavourites(nonNullRadioStation.url)
+                        if (isStationInFavourites) {
+                            stationSavedInFavouritesLiveData.call()
+                        }
+                    }
                 }
+            } catch (e: IOException) {
+                e.printStackTrace()
+                failedLiveData.call()
             }
         }
     }
@@ -77,12 +95,81 @@ class HomeRadioViewModel @Inject constructor(
     // Получаем радиостанцию из списка на предыдущей странице, если перешли сюда из списка радиостанций
     fun saveRadioStationAndShow(radioStation: RadioStationPresentation) {
         viewModelScope.launch(Dispatchers.IO) {
-            // Поменять в Shared Preference setIsRadioStationStored на true
-            // Сохранить в Shared Preference (url) и Room (станцию)
-            homeRadioInteractor.saveRadioStationUrl(true, radioStation)
-            // Отобразить
-            radioStationSavedLiveData.postValue(radioStation)
+            try {
+                // Поменять в Shared Preference setIsRadioStationStored на true
+                // Сохранить в Shared Preference (url) и Room (станцию)
+                homeRadioInteractor.saveRadioStationUrl(true, radioStation)
+                // Отобразить
+                radioStationSavedLiveData.postValue(radioStation)
+                // Favourites
+                val isStationInFavourites =
+                    homeRadioInteractor.isStationInFavourites(radioStation.url)
+                if (isStationInFavourites) {
+                    stationSavedInFavouritesLiveData.call()
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
+                failedLiveData.call()
+            }
         }
     }
 
+    fun addStationToFavourites(currentRadioStation: RadioStationPresentation) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val userCreatorIdInt = homeRadioInteractor.getToken()
+                if (userCreatorIdInt != null) {
+                    homeRadioInteractor.addStationToFavourites(
+                        userCreatorIdInt,
+                        currentRadioStation
+                    )
+                    stationSavedInFavouritesLiveData.call()
+                } else {
+                    addStationToFavouritesFailedLiveData.call()
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
+                failedLiveData.call()
+            }
+        }
+    }
+
+    fun checkIsStationInFavouritesAndChangeTheStar(currentRadioStation: RadioStationPresentation) {
+        viewModelScope.launch(Dispatchers.IO) {
+            // Уточняем Id
+            val userCreatorIdInt = homeRadioInteractor.getToken()
+            if (userCreatorIdInt != null) {
+                // Проверяем, есть ли станция в избранном
+                val isStationInFavourites =
+                    homeRadioInteractor.isStationInFavourites(currentRadioStation.url)
+                if (isStationInFavourites) {
+                    // Если станция есть в избранном и нажали на звезду, нужно из избранного удалить и убрать звезду
+                    try {
+                        homeRadioInteractor.deleteRadioStationFromFavourite(
+                            userCreatorIdInt,
+                            currentRadioStation
+                        )
+                        stationDeletedFromFavouritesLiveData.call()
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                        failedLiveData.call()
+                    }
+                } else {
+                    // Если станции в избранном нет, нужно добавить её в избранное и поставить звезду
+                    try {
+                        homeRadioInteractor.addStationToFavourites(
+                            userCreatorIdInt,
+                            currentRadioStation
+                        )
+                        stationSavedInFavouritesLiveData.call()
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                        failedLiveData.call()
+                    }
+                }
+            } else {
+                addStationToFavouritesFailedLiveData.call()
+            }
+        }
+    }
 }

@@ -6,6 +6,7 @@ import com.myproject.radiojourney.data.dataSource.local.radio.ILocalRadioDataSou
 import com.myproject.radiojourney.data.dataSource.network.INetworkRadioDataSource
 import com.myproject.radiojourney.domain.iRepository.IContentRepository
 import com.myproject.radiojourney.model.local.CountryLocal
+import com.myproject.radiojourney.model.local.RadioStationFavouriteLocal
 import com.myproject.radiojourney.model.local.RadioStationLocal
 import com.myproject.radiojourney.model.presentation.RadioStationPresentation
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -62,5 +63,43 @@ class ContentRepository @Inject constructor(
     ) {
         val radioStationLocal = RadioStationLocal.fromPresentationToLocal(radioStation)
         localRadioDataSource.saveRadioStationUrl(isStored, radioStationLocal)
+    }
+
+    override suspend fun getToken(): Int? {
+        // Узнаём userCreatorId
+        // В нашем случае userCreatorId = token
+        val userCreatorId = localRadioDataSource.getToken()
+        val userCreatorIdInt = userCreatorId.toIntOrNull()
+        Log.d(TAG, "Результат преобразования $userCreatorId String в Int = $userCreatorIdInt")
+
+        return userCreatorIdInt
+    }
+
+    override suspend fun addStationToFavourites(
+        userCreatorIdInt: Int,
+        currentRadioStation: RadioStationPresentation
+    ) {
+        // Сохраняем станцию в Favourite
+        val currentRadioStationFavourite =
+            RadioStationFavouriteLocal.fromPresentationToFavouriteLocal(
+                currentRadioStation,
+                userCreatorIdInt
+            )
+        localRadioDataSource.addStationToFavourites(currentRadioStationFavourite)
+    }
+
+    override suspend fun isStationInFavourites(url: String): Boolean =
+        localRadioDataSource.isStationInFavourites(url)
+
+    override suspend fun deleteRadioStationFromFavourite(
+        userCreatorIdInt: Int,
+        currentRadioStation: RadioStationPresentation
+    ) {
+        val currentRadioStationFavourite =
+            RadioStationFavouriteLocal.fromPresentationToFavouriteLocal(
+                currentRadioStation,
+                userCreatorIdInt
+            )
+        localRadioDataSource.deleteRadioStationFromFavourite(currentRadioStationFavourite)
     }
 }

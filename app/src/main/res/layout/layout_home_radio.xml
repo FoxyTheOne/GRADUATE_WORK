@@ -136,6 +136,16 @@
                 app:backgroundTint="@null" />
         </LinearLayout>
 
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_star"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="@dimen/space_beforeOrAfterElement"
+            android:layout_marginBottom="@dimen/space_beforeOrAfterElement"
+            app:layout_constraintBottom_toBottomOf="@+id/linear_radioStationButtons"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/linear_radioStationButtons" />
+
         <Button
             android:id="@+id/button_zoomPlus"
             style="@style/Widget.MaterialComponents.Button.TextButton"
@@ -194,6 +204,22 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- ProgressBar
+            android:id="@+id/progress_horizontal"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_beforeOrAfterElement"
+            android:layout_marginTop="@dimen/space_small"
+            android:layout_marginEnd="@dimen/space_beforeOrAfterElement"
+            android:progress="0"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" / -->
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_loadingData"
