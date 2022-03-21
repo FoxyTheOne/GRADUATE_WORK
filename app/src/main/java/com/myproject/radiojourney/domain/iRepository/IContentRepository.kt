@@ -3,6 +3,7 @@ package com.myproject.radiojourney.domain.iRepository
 import com.myproject.radiojourney.model.local.CountryLocal
 import com.myproject.radiojourney.model.local.RadioStationFavouriteLocal
 import com.myproject.radiojourney.model.local.RadioStationLocal
+import com.myproject.radiojourney.model.local.UserWithStations
 import com.myproject.radiojourney.model.presentation.RadioStationPresentation
 import kotlinx.coroutines.flow.Flow
 
@@ -19,6 +20,7 @@ interface IContentRepository {
     suspend fun getRadioStationSaved(radioStationUrl: String): RadioStationLocal?
 
     suspend fun saveRadioStationUrl(isStored: Boolean, radioStation: RadioStationPresentation)
+    suspend fun saveFavouriteRadioStationUrl(isStored: Boolean, url: String)
 
     suspend fun getToken(): Int?
     suspend fun addStationToFavourites(
@@ -31,4 +33,6 @@ interface IContentRepository {
         userCreatorIdInt: Int,
         currentRadioStation: RadioStationPresentation
     )
+
+    suspend fun getUsersWithStations(): List<UserWithStations>
 }

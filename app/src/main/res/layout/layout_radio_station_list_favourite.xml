@@ -29,31 +29,15 @@
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_radioStationDialogCity"
             style="@style/login_title"
+            android:text="@string/favouriteRadioStationList_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:padding="@dimen/space_beforeOrAfterElement"
-            app:layout_constraintBottom_toTopOf="@+id/text_radioStationDialogTitle"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/home_toolbar"
-            app:layout_constraintVertical_chainStyle="packed"
-            tools:text="City" />
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_radioStationDialogTitle"
-            style="@style/login_bottom_orange"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:paddingStart="@dimen/space_beforeOrAfterElement"
-            android:paddingEnd="@dimen/space_beforeOrAfterElement"
-            android:paddingBottom="@dimen/space_beforeOrAfterElement"
-            android:text="@string/radioStationList_title"
             app:layout_constraintBottom_toTopOf="@+id/recyclerView_radioStationList"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/text_radioStationDialogCity"
+            app:layout_constraintTop_toBottomOf="@+id/home_toolbar"
             app:layout_constraintVertical_chainStyle="packed" />
 
         <androidx.recyclerview.widget.RecyclerView
@@ -64,7 +48,7 @@
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/text_radioStationDialogTitle"
+            app:layout_constraintTop_toBottomOf="@+id/text_radioStationDialogCity"
             app:layout_constraintVertical_chainStyle="packed" />
 
         <!-- layout для ProgressBar -->

@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.myproject.radiojourney.domain.homeRadio.IHomeRadioInteractor
 import com.myproject.radiojourney.domain.logOut.ILogOutInteractor
+import com.myproject.radiojourney.model.presentation.RadioStationFavouritePresentation
 import com.myproject.radiojourney.utils.extension.call
 import com.myproject.radiojourney.model.presentation.RadioStationPresentation
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -104,6 +105,29 @@ class HomeRadioViewModel @Inject constructor(
                 // Favourites
                 val isStationInFavourites =
                     homeRadioInteractor.isStationInFavourites(radioStation.url)
+                if (isStationInFavourites) {
+                    stationSavedInFavouritesLiveData.call()
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
+                failedLiveData.call()
+            }
+        }
+    }
+
+    // Получаем радиостанцию из списка на предыдущей странице, если перешли сюда из списка любимых радиостанций (они уже сохранены в Room)
+    fun saveFavouriteRadioStationAndShow(radioStationFavourite: RadioStationFavouritePresentation) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // Поменять в Shared Preference setIsRadioStationStored на true
+                // Сохранить в Shared Preference (url) (сохранять в Room не нужно, она уже там)
+                homeRadioInteractor.saveFavouriteRadioStationUrl(true, radioStationFavourite.url)
+                // Отобразить
+                val radioStationPresentation = RadioStationPresentation.fromFavouritePresentationToPresentation(radioStationFavourite)
+                radioStationSavedLiveData.postValue(radioStationPresentation)
+                // Favourites (проверку на всякий случай оставляю. Вдруг пользователь уберет звезду (удалит из избранного), а потом нажмёт на станцию и перейдет в этот фрагмент её слушать)
+                val isStationInFavourites =
+                    homeRadioInteractor.isStationInFavourites(radioStationFavourite.url)
                 if (isStationInFavourites) {
                     stationSavedInFavouritesLiveData.call()
                 }

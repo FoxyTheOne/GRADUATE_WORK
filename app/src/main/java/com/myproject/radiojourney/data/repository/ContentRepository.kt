@@ -2,12 +2,14 @@ package com.myproject.radiojourney.data.repository
 
 import android.content.Context
 import android.util.Log
+import com.myproject.radiojourney.data.dataSource.local.auth.ILocalAuthDataSource
 import com.myproject.radiojourney.data.dataSource.local.radio.ILocalRadioDataSource
 import com.myproject.radiojourney.data.dataSource.network.INetworkRadioDataSource
 import com.myproject.radiojourney.domain.iRepository.IContentRepository
 import com.myproject.radiojourney.model.local.CountryLocal
 import com.myproject.radiojourney.model.local.RadioStationFavouriteLocal
 import com.myproject.radiojourney.model.local.RadioStationLocal
+import com.myproject.radiojourney.model.local.UserWithStations
 import com.myproject.radiojourney.model.presentation.RadioStationPresentation
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -21,7 +23,8 @@ import javax.inject.Inject
 class ContentRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     private val networkRadioDataSource: INetworkRadioDataSource,
-    private val localRadioDataSource: ILocalRadioDataSource
+    private val localRadioDataSource: ILocalRadioDataSource,
+    private val localAuthDataSource: ILocalAuthDataSource
 ) : IContentRepository {
     companion object {
         private const val TAG = "ContentRepository"
@@ -65,6 +68,9 @@ class ContentRepository @Inject constructor(
         localRadioDataSource.saveRadioStationUrl(isStored, radioStationLocal)
     }
 
+    override suspend fun saveFavouriteRadioStationUrl(isStored: Boolean, url: String) =
+        localRadioDataSource.saveFavouriteRadioStationUrl(isStored, url)
+
     override suspend fun getToken(): Int? {
         // Узнаём userCreatorId
         // В нашем случае userCreatorId = token
@@ -102,4 +108,7 @@ class ContentRepository @Inject constructor(
             )
         localRadioDataSource.deleteRadioStationFromFavourite(currentRadioStationFavourite)
     }
+
+    override suspend fun getUsersWithStations(): List<UserWithStations> =
+        localAuthDataSource.getUsersWithStations()
 }

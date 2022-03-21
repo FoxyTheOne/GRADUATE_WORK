@@ -39,6 +39,7 @@ import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener
 import com.myproject.radiojourney.model.presentation.RadioStationPresentation
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatButton
+import com.myproject.radiojourney.model.presentation.RadioStationFavouritePresentation
 import kotlinx.coroutines.*
 import java.io.IOException
 import java.lang.Exception
@@ -83,8 +84,8 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
     private lateinit var textLoadingData: AppCompatTextView
     private lateinit var imagePlay: AppCompatImageView
     private var isPaused = true
-    private lateinit var buttonAddToFavorites: AppCompatButton
-    private lateinit var buttonGoToFavorites: AppCompatButton
+    private lateinit var buttonAddToFavourites: AppCompatButton
+    private lateinit var buttonGoToFavourites: AppCompatButton
     private lateinit var imageStar: AppCompatImageView
 
     // PLAY URL (MP3), MEDIA PLAYER -> 1. Создаём переменные
@@ -140,8 +141,8 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
         textLoadingData = view.findViewById(R.id.text_loadingData)
         imagePlay = view.findViewById(R.id.image_play)
         imagePlay.setImageResource(R.drawable.play_white)
-        buttonAddToFavorites = view.findViewById(R.id.button_addToFavorites)
-        buttonGoToFavorites = view.findViewById(R.id.button_goToFavorites)
+        buttonAddToFavourites = view.findViewById(R.id.button_addToFavourites)
+        buttonGoToFavourites = view.findViewById(R.id.button_goToFavourites)
         imageStar = view.findViewById(R.id.image_star)
         imageStar.setImageResource(R.drawable.star_transparent)
 //        progressHorizontal = view.findViewById(R.id.progress_horizontal)
@@ -170,6 +171,11 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
                 ?.let { radioStation ->
                     Log.d(TAG, "Выбранный элемент списка: $radioStation")
                     viewModel.saveRadioStationAndShow(radioStation)
+                }
+            arguments?.getParcelable<RadioStationFavouritePresentation>("radio_station_favourite")
+                ?.let { radioStationFavourite ->
+                    Log.d(TAG, "Выбранный элемент списка: $radioStationFavourite")
+                    viewModel.saveFavouriteRadioStationAndShow(radioStationFavourite)
                 }
         } else {
             // 1. Подгрузить радиостанцию из Shared Preference, если она там сохранена. Если нет - текст "выберите радиостанцию"
@@ -277,7 +283,7 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
                 viewModel.checkIsStationInFavouritesAndChangeTheStar(it)
             }
         }
-        buttonAddToFavorites.setOnClickListener {
+        buttonAddToFavourites.setOnClickListener {
             if (isStationSelected) {
                 val currentRadioStation = viewModel.radioStationSavedLiveData.value
                 currentRadioStation?.let {
@@ -285,7 +291,12 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
                 }
             }
         }
-        buttonGoToFavorites.setOnClickListener { }
+        buttonGoToFavourites.setOnClickListener {
+            // Если нажали, перед переходом нужно остановить музыку
+            stopAudio()
+
+            this.findNavController().navigate(R.id.action_homeRadioFragment_to_favouriteListFragment)
+        }
     }
 
     private fun subscribeOnLiveData() {
@@ -623,6 +634,9 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
 
     // TOOLBAR - Описываем метод из интерфейса ILogOutListener для выхода из аккаунта приложения
     override fun onLogOut() {
+        // Если нажали, перед переходом нужно остановить музыку
+        stopAudio()
+
         viewModel.logout()
         this.findNavController().navigate(R.id.action_homeRadioFragment_to_auth_nav_graph)
     }

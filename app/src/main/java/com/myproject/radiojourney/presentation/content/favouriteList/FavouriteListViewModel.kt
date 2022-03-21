@@ -1,13 +1,12 @@
-package com.myproject.radiojourney.presentation.content.radioList
+package com.myproject.radiojourney.presentation.content.favouriteList
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.myproject.radiojourney.domain.favouriteList.IFavouriteListInteractor
 import com.myproject.radiojourney.domain.logOut.ILogOutInteractor
-import com.myproject.radiojourney.domain.radioList.IRadioListInteractor
+import com.myproject.radiojourney.model.presentation.RadioStationFavouritePresentation
 import com.myproject.radiojourney.utils.extension.call
-import com.myproject.radiojourney.model.presentation.RadioStationPresentation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,23 +17,20 @@ import javax.inject.Inject
  * ViewModel. Здесь осуществляется подписка, запрос через корутины. Работает с Interactor
  */
 @HiltViewModel
-class RadioListViewModel @Inject constructor(
+class FavouriteListViewModel @Inject constructor(
     private val logOutInteractor: ILogOutInteractor,
-    private val radioListInteractor: IRadioListInteractor
+    private val favouriteListInteractor: IFavouriteListInteractor
 ) : ViewModel() {
     companion object {
-        private const val TAG = "RadioListViewModel"
+        private const val TAG = "FavouriteListViewModel"
     }
-
-    // Получение списка радиостанций
-    val radioStationListLiveData = MutableLiveData<List<RadioStationPresentation>>()
+    val favouritesFailedLiveData = MutableLiveData<Boolean>()
+    val failedLiveData = MutableLiveData<Boolean>()
+    val radioStationFavouriteListLiveData = MutableLiveData<List<RadioStationFavouritePresentation>>()
 
     // LiveData, которые будут отвечать за отображение прогресса (кружок)
     val showProgressLiveData = MutableLiveData<Boolean>()
     val hideProgressLiveData = MutableLiveData<Boolean>()
-
-    // LiveData для открытия диалогового окна
-    val dialogInternetTroubleLiveData = MutableLiveData<Boolean>()
 
     fun logout() {
         viewModelScope.launch(Dispatchers.IO) {
@@ -44,16 +40,20 @@ class RadioListViewModel @Inject constructor(
         }
     }
 
-    fun getRadioStationList(countryCode: String) {
+    fun getRadioStationFavouriteListAndShow() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val radioStationPresentation: List<RadioStationPresentation> =
-                    radioListInteractor.getRadioStationList(countryCode)
-                radioStationListLiveData.postValue(radioStationPresentation)
+                // Уточняем Id
+                val userCreatorIdInt = favouriteListInteractor.getToken()
+                if (userCreatorIdInt != null) {
+                    val radioStationFavouritePresentationList = favouriteListInteractor.getRadioStationFavouriteList(userCreatorIdInt)
+                    radioStationFavouriteListLiveData.postValue(radioStationFavouritePresentationList)
+                } else {
+                    favouritesFailedLiveData.call()
+                }
             } catch (e: IOException) {
-                Log.d(TAG, "Exception: ${e.message}")
-                dialogInternetTroubleLiveData.call()
-                hideProgressLiveData.call()
+                e.printStackTrace()
+                failedLiveData.call()
             }
         }
     }

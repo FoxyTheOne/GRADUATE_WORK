@@ -21,6 +21,14 @@ data class RadioStationPresentation(
                 clickCount = radioStationLocal.clickCount,
                 countryCode = radioStationLocal.countryCode
             )
+
+        fun fromFavouritePresentationToPresentation(radioFavouritePresentation: RadioStationFavouritePresentation): RadioStationPresentation =
+            RadioStationPresentation(
+                stationName = radioFavouritePresentation.stationName,
+                url = radioFavouritePresentation.url,
+                clickCount = radioFavouritePresentation.clickCount,
+                countryCode = radioFavouritePresentation.countryCode
+            )
     }
 
 }

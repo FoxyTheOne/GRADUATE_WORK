@@ -16,6 +16,8 @@ import com.myproject.radiojourney.data.repository.AuthRepository
 import com.myproject.radiojourney.data.repository.ContentRepository
 import com.myproject.radiojourney.data.sharedPreference.AppSharedPreference
 import com.myproject.radiojourney.data.sharedPreference.IAppSharedPreference
+import com.myproject.radiojourney.domain.favouriteList.FavouriteListInteractor
+import com.myproject.radiojourney.domain.favouriteList.IFavouriteListInteractor
 import com.myproject.radiojourney.domain.homeRadio.HomeRadioInteractor
 import com.myproject.radiojourney.domain.homeRadio.IHomeRadioInteractor
 import com.myproject.radiojourney.domain.signIn.SignInInteractor
@@ -107,7 +109,7 @@ abstract class ViewModelModule {
             return appDatabase.getUserDAO()
         }
 
-        // Переношу следующие конструкторы в SingletonModule, т.к. их будет использовать Foreground service:
+        // Переношу следующие конструкторы в SingletonModule, т.к. их будет использовать LocalRadioDataSource, который использует Foreground service
 //        @Provides
 //        fun providesCountryDAO(appDatabase: AppRoomDBAbstract): ICountryDAO {
 //            return appDatabase.getCountryDAO()
@@ -150,6 +152,11 @@ abstract class ViewModelModule {
     ): IRadioListInteractor
 
     @Binds
+    abstract fun bindsIFavouriteListInteractor(
+        favouriteListInteractor: FavouriteListInteractor
+    ): IFavouriteListInteractor
+
+    @Binds
     abstract fun bindsAuthRepository(
         authRepository: AuthRepository
     ): IAuthRepository
@@ -164,7 +171,7 @@ abstract class ViewModelModule {
         localAuthDataSource: LocalAuthDataSource
     ): ILocalAuthDataSource
 
-    // Переношу следующие конструкторы в SingletonModule, т.к. их будет использовать Foreground service:
+    // Переношу следующие конструкторы в SingletonModule, т.к. их будет использовать LocalRadioDataSource, который использует Foreground service
 //    @Binds
 //    abstract fun bindsLocalRadioDataSource(
 //        localRadioDataSource: LocalRadioDataSource

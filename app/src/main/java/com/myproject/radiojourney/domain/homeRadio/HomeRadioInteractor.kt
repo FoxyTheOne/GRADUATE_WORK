@@ -1,7 +1,6 @@
 package com.myproject.radiojourney.domain.homeRadio
 
 import com.myproject.radiojourney.domain.iRepository.IContentRepository
-import com.myproject.radiojourney.model.local.RadioStationFavouriteLocal
 import com.myproject.radiojourney.model.local.RadioStationLocal
 import com.myproject.radiojourney.model.presentation.CountryPresentation
 import com.myproject.radiojourney.model.presentation.RadioStationPresentation
@@ -57,6 +56,9 @@ class HomeRadioInteractor @Inject constructor(
         radioStation: RadioStationPresentation
     ) =
         contentRepository.saveRadioStationUrl(isStored, radioStation)
+
+    override suspend fun saveFavouriteRadioStationUrl(isStored: Boolean, url: String) =
+        contentRepository.saveFavouriteRadioStationUrl(isStored, url)
 
     override suspend fun getToken(): Int? = contentRepository.getToken()
 

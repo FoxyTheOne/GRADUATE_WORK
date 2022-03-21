@@ -3,7 +3,7 @@ package com.myproject.radiojourney.data.dataSource.local.radio
 import com.myproject.radiojourney.model.local.CountryLocal
 import com.myproject.radiojourney.model.local.RadioStationFavouriteLocal
 import com.myproject.radiojourney.model.local.RadioStationLocal
-import com.myproject.radiojourney.model.presentation.RadioStationPresentation
+import com.myproject.radiojourney.model.local.UserWithStations
 import kotlinx.coroutines.flow.Flow
 
 interface ILocalRadioDataSource {
@@ -15,6 +15,7 @@ interface ILocalRadioDataSource {
     suspend fun getRadioStationSaved(radioStationUrl: String): RadioStationLocal?
 
     suspend fun saveRadioStationUrl(isStored: Boolean, radioStation: RadioStationLocal)
+    suspend fun saveFavouriteRadioStationUrl(isStored: Boolean, url: String)
 
     suspend fun addStationToFavourites(currentRadioStationFavourite: RadioStationFavouriteLocal)
     suspend fun getToken(): String
