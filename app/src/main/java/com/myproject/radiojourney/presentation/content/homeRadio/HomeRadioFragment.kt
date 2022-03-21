@@ -295,7 +295,8 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
             // Если нажали, перед переходом нужно остановить музыку
             stopAudio()
 
-            this.findNavController().navigate(R.id.action_homeRadioFragment_to_favouriteListFragment)
+            this.findNavController()
+                .navigate(R.id.action_homeRadioFragment_to_favouriteListFragment)
         }
     }
 
@@ -318,7 +319,11 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
                 isStationSelected = true
             })
         viewModel.addStationToFavouritesFailedLiveData.observe(viewLifecycleOwner, {
-            Toast.makeText(context, "Interacting with favourites failed. Smth wrong with your token. Try re-login.", Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                context,
+                "Interacting with favourites failed. Smth wrong with your token. Try re-login.",
+                Toast.LENGTH_LONG
+            ).show()
         })
         viewModel.failedLiveData.observe(viewLifecycleOwner, {
             Toast.makeText(context, "Failure. Something went wrong", Toast.LENGTH_LONG).show()

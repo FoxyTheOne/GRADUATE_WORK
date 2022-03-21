@@ -4,7 +4,6 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.myproject.radiojourney.model.presentation.RadioStationPresentation
-import com.myproject.radiojourney.model.remote.RadioStationRemote
 
 /**
  * В нашем случае в одной программе может быть несколько пользователей, но одна общая база Room.
@@ -26,7 +25,10 @@ data class RadioStationFavouriteLocal(
 ) {
 
     companion object {
-        fun fromPresentationToFavouriteLocal(presentation: RadioStationPresentation, userCreatorId: Int): RadioStationFavouriteLocal =
+        fun fromPresentationToFavouriteLocal(
+            presentation: RadioStationPresentation,
+            userCreatorId: Int
+        ): RadioStationFavouriteLocal =
             RadioStationFavouriteLocal(
                 url = presentation.url,
                 userCreatorId = userCreatorId,

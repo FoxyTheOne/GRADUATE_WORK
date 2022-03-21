@@ -26,6 +26,7 @@ class HomeRadioViewModel @Inject constructor(
     companion object {
         private const val TAG = "HomeRadioViewModel"
     }
+
     val failedLiveData = MutableLiveData<Boolean>()
 
     // Подписка на локальную БД
@@ -123,7 +124,10 @@ class HomeRadioViewModel @Inject constructor(
                 // Сохранить в Shared Preference (url) (сохранять в Room не нужно, она уже там)
                 homeRadioInteractor.saveFavouriteRadioStationUrl(true, radioStationFavourite.url)
                 // Отобразить
-                val radioStationPresentation = RadioStationPresentation.fromFavouritePresentationToPresentation(radioStationFavourite)
+                val radioStationPresentation =
+                    RadioStationPresentation.fromFavouritePresentationToPresentation(
+                        radioStationFavourite
+                    )
                 radioStationSavedLiveData.postValue(radioStationPresentation)
                 // Favourites (проверку на всякий случай оставляю. Вдруг пользователь уберет звезду (удалит из избранного), а потом нажмёт на станцию и перейдет в этот фрагмент её слушать)
                 val isStationInFavourites =

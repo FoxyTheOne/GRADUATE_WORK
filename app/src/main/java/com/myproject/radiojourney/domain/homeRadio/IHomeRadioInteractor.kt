@@ -15,8 +15,14 @@ interface IHomeRadioInteractor {
     suspend fun saveFavouriteRadioStationUrl(isStored: Boolean, url: String)
 
     suspend fun getToken(): Int?
-    suspend fun addStationToFavourites(userCreatorIdInt: Int, currentRadioStation: RadioStationPresentation)
+    suspend fun addStationToFavourites(
+        userCreatorIdInt: Int,
+        currentRadioStation: RadioStationPresentation
+    )
 
     suspend fun isStationInFavourites(url: String): Boolean
-    suspend fun deleteRadioStationFromFavourite(userCreatorIdInt: Int, currentRadioStation: RadioStationPresentation)
+    suspend fun deleteRadioStationFromFavourite(
+        userCreatorIdInt: Int,
+        currentRadioStation: RadioStationPresentation
+    )
 }

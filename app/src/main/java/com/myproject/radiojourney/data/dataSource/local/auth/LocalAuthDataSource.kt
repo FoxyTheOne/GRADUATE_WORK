@@ -69,5 +69,6 @@ class LocalAuthDataSource @Inject constructor(
 
     // Выход из аккаунта
     override fun logout() = preference.saveToken(null)
-    override suspend fun getUsersWithStations(): List<UserWithStations> = userDAO.getUsersWithStations()
+    override suspend fun getUsersWithStations(): List<UserWithStations> =
+        userDAO.getUsersWithStations()
 }

@@ -1,7 +1,6 @@
 package com.myproject.radiojourney.data.localDatabaseRoom
 
 import androidx.room.*
-import com.myproject.radiojourney.model.local.CountryLocal
 import com.myproject.radiojourney.model.local.RadioStationFavouriteLocal
 
 @Dao

@@ -17,6 +17,7 @@ class FavouriteListInteractor @Inject constructor(
     companion object {
         private const val TAG = "FavouriteListInteractor"
     }
+
     override suspend fun getToken(): Int? = contentRepository.getToken()
 
     override suspend fun getRadioStationFavouriteList(userCreatorIdInt: Int): List<RadioStationFavouritePresentation> {
@@ -32,9 +33,11 @@ class FavouriteListInteractor @Inject constructor(
             }
         }
 
-        val radioStationFavouritePresentationList = mutableListOf<RadioStationFavouritePresentation>()
+        val radioStationFavouritePresentationList =
+            mutableListOf<RadioStationFavouritePresentation>()
         radioStationFavouriteList.forEach { radioStationFavouriteLocal ->
-            val radioStationFavouritePresentation = RadioStationFavouritePresentation.fromLocalToPresentation(radioStationFavouriteLocal)
+            val radioStationFavouritePresentation =
+                RadioStationFavouritePresentation.fromLocalToPresentation(radioStationFavouriteLocal)
             radioStationFavouritePresentationList.add(radioStationFavouritePresentation)
         }
 

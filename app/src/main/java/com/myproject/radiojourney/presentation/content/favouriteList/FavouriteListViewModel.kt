@@ -24,9 +24,11 @@ class FavouriteListViewModel @Inject constructor(
     companion object {
         private const val TAG = "FavouriteListViewModel"
     }
+
     val favouritesFailedLiveData = MutableLiveData<Boolean>()
     val failedLiveData = MutableLiveData<Boolean>()
-    val radioStationFavouriteListLiveData = MutableLiveData<List<RadioStationFavouritePresentation>>()
+    val radioStationFavouriteListLiveData =
+        MutableLiveData<List<RadioStationFavouritePresentation>>()
 
     // LiveData, которые будут отвечать за отображение прогресса (кружок)
     val showProgressLiveData = MutableLiveData<Boolean>()
@@ -46,8 +48,11 @@ class FavouriteListViewModel @Inject constructor(
                 // Уточняем Id
                 val userCreatorIdInt = favouriteListInteractor.getToken()
                 if (userCreatorIdInt != null) {
-                    val radioStationFavouritePresentationList = favouriteListInteractor.getRadioStationFavouriteList(userCreatorIdInt)
-                    radioStationFavouriteListLiveData.postValue(radioStationFavouritePresentationList)
+                    val radioStationFavouritePresentationList =
+                        favouriteListInteractor.getRadioStationFavouriteList(userCreatorIdInt)
+                    radioStationFavouriteListLiveData.postValue(
+                        radioStationFavouritePresentationList
+                    )
                 } else {
                     favouritesFailedLiveData.call()
                 }

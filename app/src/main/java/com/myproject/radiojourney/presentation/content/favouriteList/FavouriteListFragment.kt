@@ -13,9 +13,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.myproject.radiojourney.IAppSettings
 import com.myproject.radiojourney.R
 import com.myproject.radiojourney.presentation.content.base.BaseContentFragmentAbstract
-import com.myproject.radiojourney.presentation.content.radioList.RadioListAdapter
-import com.myproject.radiojourney.presentation.content.radioList.RadioListFragment
-import com.myproject.radiojourney.presentation.content.radioList.RadioListFragmentDirections
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
