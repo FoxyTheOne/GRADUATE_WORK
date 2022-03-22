@@ -3,6 +3,7 @@ package com.myproject.radiojourney.model.local
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.myproject.radiojourney.model.presentation.RadioStationFavouritePresentation
 import com.myproject.radiojourney.model.presentation.RadioStationPresentation
 
 /**
@@ -21,20 +22,36 @@ data class RadioStationFavouriteLocal(
     @ColumnInfo(name = "userCreatorId") val userCreatorId: Int,
     @ColumnInfo(name = "stationName") val stationName: String,
     @ColumnInfo(name = "clickCount") val clickCount: Int,
-    @ColumnInfo(name = "countryCode") val countryCode: String
+    @ColumnInfo(name = "countryCode") val countryCode: String,
+    @ColumnInfo(name = "isStationInFavourite") var isStationInFavourite: Boolean
 ) {
 
     companion object {
         fun fromPresentationToFavouriteLocal(
             presentation: RadioStationPresentation,
-            userCreatorId: Int
+            userCreatorId: Int,
+            isStationInFavourite: Boolean = presentation.isStationInFavourite
         ): RadioStationFavouriteLocal =
             RadioStationFavouriteLocal(
                 url = presentation.url,
                 userCreatorId = userCreatorId,
                 stationName = presentation.stationName,
                 clickCount = presentation.clickCount,
-                countryCode = presentation.countryCode
+                countryCode = presentation.countryCode,
+                isStationInFavourite = isStationInFavourite
+            )
+
+        fun fromFavouritePresentationToFavouriteLocal(
+            favouritePresentation: RadioStationFavouritePresentation,
+            isStationInFavourite: Boolean = favouritePresentation.isStationInFavourite
+        ): RadioStationFavouriteLocal =
+            RadioStationFavouriteLocal(
+                url = favouritePresentation.url,
+                userCreatorId = favouritePresentation.userCreatorId,
+                stationName = favouritePresentation.stationName,
+                clickCount = favouritePresentation.clickCount,
+                countryCode = favouritePresentation.countryCode,
+                isStationInFavourite = isStationInFavourite
             )
     }
 

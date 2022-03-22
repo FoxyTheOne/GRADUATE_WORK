@@ -152,6 +152,8 @@ class HomeRadioViewModel @Inject constructor(
                         currentRadioStation
                     )
                     stationSavedInFavouritesLiveData.call()
+                    // В случае успеха, так же ставим true в объекте текущей радиостанции
+                    currentRadioStation.isStationInFavourite = true
                 } else {
                     addStationToFavouritesFailedLiveData.call()
                 }
@@ -178,6 +180,8 @@ class HomeRadioViewModel @Inject constructor(
                             currentRadioStation
                         )
                         stationDeletedFromFavouritesLiveData.call()
+                        // В случае успеха, так же ставим false в объекте текущей радиостанции
+                        currentRadioStation.isStationInFavourite = false
                     } catch (e: IOException) {
                         e.printStackTrace()
                         failedLiveData.call()
@@ -190,6 +194,8 @@ class HomeRadioViewModel @Inject constructor(
                             currentRadioStation
                         )
                         stationSavedInFavouritesLiveData.call()
+                        // В случае успеха, так же ставим true в объекте текущей радиостанции
+                        currentRadioStation.isStationInFavourite = true
                     } catch (e: IOException) {
                         e.printStackTrace()
                         failedLiveData.call()

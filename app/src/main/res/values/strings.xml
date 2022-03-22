@@ -28,7 +28,7 @@
     <string name="homeRadio_goToFavourites">Go to favourites</string>
     <string name="homeRadio_selectRadioStation">Select radio station</string>
     <string name="homeRadio_canTakeTime">It may take time to connect.</string>
-    <string name="homeRadio_mayNotWork">Also the radio station may not work right now.</string>
+    <string name="homeRadio_mayNotWork">Also selected radio station may not work right now.</string>
 
     <string name="dialogInternetTrouble_title">Cashing failed</string>
     <string name="dialogInternetTrouble_text">If it is the first start - please, try turn on and then turn off airplane mode, and then restart the program.</string>

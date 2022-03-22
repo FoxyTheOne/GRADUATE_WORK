@@ -12,23 +12,32 @@ data class RadioStationLocal(
     @PrimaryKey
     @ColumnInfo(name = "url") val url: String,
     @ColumnInfo(name = "clickCount") val clickCount: Int,
-    @ColumnInfo(name = "countrycode") val countryCode: String
+    @ColumnInfo(name = "countryCode") val countryCode: String,
+    @ColumnInfo(name = "isStationInFavourite") var isStationInFavourite: Boolean
 ) {
 
     companion object {
-        fun fromRemoteToLocal(remote: RadioStationRemote): RadioStationLocal = RadioStationLocal(
+        fun fromRemoteToLocal(
+            remote: RadioStationRemote,
+            isStationInFavourite: Boolean = false
+        ): RadioStationLocal = RadioStationLocal(
             stationName = remote.name,
             url = remote.url,
             clickCount = remote.clickcount,
-            countryCode = remote.countrycode
+            countryCode = remote.countrycode,
+            isStationInFavourite = isStationInFavourite
         )
 
-        fun fromPresentationToLocal(presentation: RadioStationPresentation): RadioStationLocal =
+        fun fromPresentationToLocal(
+            presentation: RadioStationPresentation,
+            isStationInFavourite: Boolean = presentation.isStationInFavourite
+        ): RadioStationLocal =
             RadioStationLocal(
                 stationName = presentation.stationName,
                 url = presentation.url,
                 clickCount = presentation.clickCount,
-                countryCode = presentation.countryCode
+                countryCode = presentation.countryCode,
+                isStationInFavourite = isStationInFavourite
             )
     }
 

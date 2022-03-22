@@ -10,10 +10,10 @@ import com.myproject.radiojourney.model.local.UserEntity
 
 @Database(
     entities = [UserEntity::class, CountryLocal::class, RadioStationLocal::class, RadioStationFavouriteLocal::class],
-    version = 4,
+    version = 5,
     exportSchema = true,
 //    autoMigrations = [
-//        AutoMigration(from = 3, to = 4)
+//        AutoMigration(from = 4, to = 5)
 //    ]
 )
 @TypeConverters(LatLngConverter::class)

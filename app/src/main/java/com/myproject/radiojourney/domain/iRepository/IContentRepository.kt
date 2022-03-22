@@ -1,6 +1,7 @@
 package com.myproject.radiojourney.domain.iRepository
 
 import com.myproject.radiojourney.model.local.CountryLocal
+import com.myproject.radiojourney.model.local.RadioStationFavouriteLocal
 import com.myproject.radiojourney.model.local.RadioStationLocal
 import com.myproject.radiojourney.model.local.UserWithStations
 import com.myproject.radiojourney.model.presentation.RadioStationPresentation
@@ -22,16 +23,10 @@ interface IContentRepository {
     suspend fun saveFavouriteRadioStationUrl(isStored: Boolean, url: String)
 
     suspend fun getToken(): Int?
-    suspend fun addStationToFavourites(
-        userCreatorIdInt: Int,
-        currentRadioStation: RadioStationPresentation
-    )
+    suspend fun addStationToFavourites(currentRadioStationFavouriteLocal: RadioStationFavouriteLocal)
 
     suspend fun isStationInFavourites(url: String): Boolean
-    suspend fun deleteRadioStationFromFavourite(
-        userCreatorIdInt: Int,
-        currentRadioStation: RadioStationPresentation
-    )
+    suspend fun deleteRadioStationFromFavourite(currentRadioStationFavouriteLocal: RadioStationFavouriteLocal)
 
     suspend fun getUsersWithStations(): List<UserWithStations>
 }

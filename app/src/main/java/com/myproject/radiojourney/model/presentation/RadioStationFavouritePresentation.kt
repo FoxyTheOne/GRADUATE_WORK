@@ -10,18 +10,23 @@ data class RadioStationFavouritePresentation(
     val userCreatorId: Int,
     val stationName: String,
     val clickCount: Int,
-    val countryCode: String
+    val countryCode: String,
+    var isStationInFavourite: Boolean
 ) :
     Parcelable {
 
     companion object {
-        fun fromLocalToPresentation(local: RadioStationFavouriteLocal): RadioStationFavouritePresentation =
+        fun fromLocalToPresentation(
+            local: RadioStationFavouriteLocal,
+            isStationInFavourite: Boolean = local.isStationInFavourite
+        ): RadioStationFavouritePresentation =
             RadioStationFavouritePresentation(
                 url = local.url,
                 userCreatorId = local.userCreatorId,
                 stationName = local.stationName,
                 clickCount = local.clickCount,
-                countryCode = local.countryCode
+                countryCode = local.countryCode,
+                isStationInFavourite = isStationInFavourite
             )
     }
 

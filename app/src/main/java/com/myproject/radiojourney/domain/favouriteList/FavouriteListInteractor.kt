@@ -43,4 +43,25 @@ class FavouriteListInteractor @Inject constructor(
 
         return radioStationFavouritePresentationList
     }
+
+    override suspend fun isStationInFavourites(url: String): Boolean =
+        contentRepository.isStationInFavourites(url)
+
+    override suspend fun deleteRadioStationFromFavourite(currentFavouriteRadioStation: RadioStationFavouritePresentation) {
+        val currentRadioStationFavouriteLocal =
+            RadioStationFavouriteLocal.fromFavouritePresentationToFavouriteLocal(
+                currentFavouriteRadioStation,
+                isStationInFavourite = false
+            )
+        contentRepository.deleteRadioStationFromFavourite(currentRadioStationFavouriteLocal)
+    }
+
+    override suspend fun addStationToFavourites(currentFavouriteRadioStation: RadioStationFavouritePresentation) {
+        val currentRadioStationFavouriteLocal =
+            RadioStationFavouriteLocal.fromFavouritePresentationToFavouriteLocal(
+                currentFavouriteRadioStation,
+                isStationInFavourite = true
+            )
+        contentRepository.addStationToFavourites(currentRadioStationFavouriteLocal)
+    }
 }

@@ -37,7 +37,7 @@ class RadioListFragment : BaseContentFragmentAbstract() {
     private lateinit var radioStationListRecyclerView: RecyclerView
     private lateinit var radioStationListAdapter: RadioListAdapter
     private var radioStationList = listOf<RadioStationPresentation>(
-        RadioStationPresentation("Test", "test", 2, "test")
+        RadioStationPresentation("Test", "test", 2, "test", false)
     )
 
     override fun onCreateView(

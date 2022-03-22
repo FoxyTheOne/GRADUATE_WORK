@@ -81,33 +81,15 @@ class ContentRepository @Inject constructor(
         return userCreatorIdInt
     }
 
-    override suspend fun addStationToFavourites(
-        userCreatorIdInt: Int,
-        currentRadioStation: RadioStationPresentation
-    ) {
-        // Сохраняем станцию в Favourite
-        val currentRadioStationFavourite =
-            RadioStationFavouriteLocal.fromPresentationToFavouriteLocal(
-                currentRadioStation,
-                userCreatorIdInt
-            )
-        localRadioDataSource.addStationToFavourites(currentRadioStationFavourite)
+    override suspend fun addStationToFavourites(currentRadioStationFavouriteLocal: RadioStationFavouriteLocal) {
+        localRadioDataSource.addStationToFavourites(currentRadioStationFavouriteLocal)
     }
 
     override suspend fun isStationInFavourites(url: String): Boolean =
         localRadioDataSource.isStationInFavourites(url)
 
-    override suspend fun deleteRadioStationFromFavourite(
-        userCreatorIdInt: Int,
-        currentRadioStation: RadioStationPresentation
-    ) {
-        val currentRadioStationFavourite =
-            RadioStationFavouriteLocal.fromPresentationToFavouriteLocal(
-                currentRadioStation,
-                userCreatorIdInt
-            )
-        localRadioDataSource.deleteRadioStationFromFavourite(currentRadioStationFavourite)
-    }
+    override suspend fun deleteRadioStationFromFavourite(currentRadioStationFavouriteLocal: RadioStationFavouriteLocal) =
+        localRadioDataSource.deleteRadioStationFromFavourite(currentRadioStationFavouriteLocal)
 
     override suspend fun getUsersWithStations(): List<UserWithStations> =
         localAuthDataSource.getUsersWithStations()

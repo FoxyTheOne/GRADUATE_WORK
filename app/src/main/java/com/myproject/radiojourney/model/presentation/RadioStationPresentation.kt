@@ -9,25 +9,34 @@ data class RadioStationPresentation(
     val stationName: String,
     val url: String,
     val clickCount: Int,
-    val countryCode: String
+    val countryCode: String,
+    var isStationInFavourite: Boolean
 ) :
     Parcelable {
 
     companion object {
-        fun fromLocalToPresentation(radioStationLocal: RadioStationLocal): RadioStationPresentation =
+        fun fromLocalToPresentation(
+            radioStationLocal: RadioStationLocal,
+            isStationInFavourite: Boolean = radioStationLocal.isStationInFavourite
+        ): RadioStationPresentation =
             RadioStationPresentation(
                 stationName = radioStationLocal.stationName,
                 url = radioStationLocal.url,
                 clickCount = radioStationLocal.clickCount,
-                countryCode = radioStationLocal.countryCode
+                countryCode = radioStationLocal.countryCode,
+                isStationInFavourite = isStationInFavourite
             )
 
-        fun fromFavouritePresentationToPresentation(radioFavouritePresentation: RadioStationFavouritePresentation): RadioStationPresentation =
+        fun fromFavouritePresentationToPresentation(
+            radioFavouritePresentation: RadioStationFavouritePresentation,
+            isStationInFavourite: Boolean = radioFavouritePresentation.isStationInFavourite
+        ): RadioStationPresentation =
             RadioStationPresentation(
                 stationName = radioFavouritePresentation.stationName,
                 url = radioFavouritePresentation.url,
                 clickCount = radioFavouritePresentation.clickCount,
-                countryCode = radioFavouritePresentation.countryCode
+                countryCode = radioFavouritePresentation.countryCode,
+                isStationInFavourite = isStationInFavourite
             )
     }
 

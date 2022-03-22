@@ -1,6 +1,7 @@
 package com.myproject.radiojourney.domain.homeRadio
 
 import com.myproject.radiojourney.domain.iRepository.IContentRepository
+import com.myproject.radiojourney.model.local.RadioStationFavouriteLocal
 import com.myproject.radiojourney.model.local.RadioStationLocal
 import com.myproject.radiojourney.model.presentation.CountryPresentation
 import com.myproject.radiojourney.model.presentation.RadioStationPresentation
@@ -65,8 +66,15 @@ class HomeRadioInteractor @Inject constructor(
     override suspend fun addStationToFavourites(
         userCreatorIdInt: Int,
         currentRadioStation: RadioStationPresentation
-    ) =
-        contentRepository.addStationToFavourites(userCreatorIdInt, currentRadioStation)
+    ) {
+        val currentRadioStationFavouriteLocal =
+            RadioStationFavouriteLocal.fromPresentationToFavouriteLocal(
+                currentRadioStation,
+                userCreatorIdInt,
+                isStationInFavourite = true
+            )
+        contentRepository.addStationToFavourites(currentRadioStationFavouriteLocal)
+    }
 
     override suspend fun isStationInFavourites(url: String): Boolean =
         contentRepository.isStationInFavourites(url)
@@ -74,6 +82,14 @@ class HomeRadioInteractor @Inject constructor(
     override suspend fun deleteRadioStationFromFavourite(
         userCreatorIdInt: Int,
         currentRadioStation: RadioStationPresentation
-    ) =
-        contentRepository.deleteRadioStationFromFavourite(userCreatorIdInt, currentRadioStation)
+    ) {
+        val currentRadioStationFavouriteLocal =
+            RadioStationFavouriteLocal.fromPresentationToFavouriteLocal(
+                currentRadioStation,
+                userCreatorIdInt,
+                isStationInFavourite = false
+            )
+        contentRepository.deleteRadioStationFromFavourite(currentRadioStationFavouriteLocal)
+    }
+
 }

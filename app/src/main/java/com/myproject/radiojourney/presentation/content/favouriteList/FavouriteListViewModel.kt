@@ -29,6 +29,8 @@ class FavouriteListViewModel @Inject constructor(
     val failedLiveData = MutableLiveData<Boolean>()
     val radioStationFavouriteListLiveData =
         MutableLiveData<List<RadioStationFavouritePresentation>>()
+    val stationSavedInFavouritesLiveData = MutableLiveData<Boolean>()
+    val stationDeletedFromFavouritesLiveData = MutableLiveData<Boolean>()
 
     // LiveData, которые будут отвечать за отображение прогресса (кружок)
     val showProgressLiveData = MutableLiveData<Boolean>()
@@ -59,6 +61,45 @@ class FavouriteListViewModel @Inject constructor(
             } catch (e: IOException) {
                 e.printStackTrace()
                 failedLiveData.call()
+            }
+        }
+    }
+
+    fun checkIsStationInFavouritesAndChangeTheStar(currentFavouriteRadioStation: RadioStationFavouritePresentation) {
+        viewModelScope.launch(Dispatchers.IO) {
+            // Уточняем Id
+            val userCreatorIdInt = favouriteListInteractor.getToken()
+            if (userCreatorIdInt != null) {
+                // Проверяем, есть ли станция в избранном.
+                val isStationInFavourites =
+                    favouriteListInteractor.isStationInFavourites(currentFavouriteRadioStation.url)
+                if (isStationInFavourites) {
+                    // Если станция есть в избранном и нажали на звезду, нужно из избранного удалить и убрать звезду
+                    try {
+                        favouriteListInteractor.deleteRadioStationFromFavourite(
+                            currentFavouriteRadioStation
+                        )
+                        stationDeletedFromFavouritesLiveData.call()
+                        // В случае успеха, так же ставим false в объекте текущей радиостанции
+                        currentFavouriteRadioStation.isStationInFavourite = false
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                        failedLiveData.call()
+                    }
+                } else {
+                    // Если станции в избранном нет, нужно добавить её в избранное и поставить звезду
+                    try {
+                        favouriteListInteractor.addStationToFavourites(currentFavouriteRadioStation)
+                        stationSavedInFavouritesLiveData.call()
+                        // В случае успеха, так же ставим true в объекте текущей радиостанции
+                        currentFavouriteRadioStation.isStationInFavourite = true
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                        failedLiveData.call()
+                    }
+                }
+            } else {
+                favouritesFailedLiveData.call()
             }
         }
     }
