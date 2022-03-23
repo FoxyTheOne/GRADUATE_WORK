@@ -53,15 +53,15 @@ class MainActivity : AppCompatActivity(), IAppSettings {
         )
     }
 
-    override fun onBackPressed() {
-        val fragmentCount = supportFragmentManager.backStackEntryCount
-
-        if (fragmentCount >= 1) {
-            super.onBackPressed()
-        } else {
-            finish()
-        }
-    }
+//    override fun onBackPressed() {
+//        val fragmentCount = supportFragmentManager.backStackEntryCount
+//
+//        if (fragmentCount >= 1) {
+//            super.onBackPressed()
+//        } else {
+//            finish()
+//        }
+//    }
 
     private fun clearBackStack() =
         supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
