@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.*
 import android.widget.FrameLayout
 import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
@@ -32,6 +33,7 @@ class FavouriteListFragment : BaseContentFragmentAbstract() {
     private lateinit var frameLayout: FrameLayout
     private lateinit var progressCircular: ProgressBar
     private lateinit var favouiteListAdapter: FavouiteListAdapter
+    private lateinit var textFavouritesEmpty: TextView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,6 +51,7 @@ class FavouriteListFragment : BaseContentFragmentAbstract() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         recyclerViewRadioStationList = view.findViewById(R.id.recyclerView_radioStationList)
+        textFavouritesEmpty = view.findViewById(R.id.text_favouritesEmpty)
 
         // Переменные для отображения прогресса
         frameLayout = view.findViewById(R.id.frameLayout)
@@ -62,7 +65,9 @@ class FavouriteListFragment : BaseContentFragmentAbstract() {
     }
 
     private fun initListeners() {
-
+        textFavouritesEmpty.setOnClickListener {
+            this.findNavController().navigate(R.id.action_favouriteListFragment_to_homeRadioFragment)
+        }
     }
 
     private fun subscribeOnLiveData() {
@@ -90,36 +95,46 @@ class FavouriteListFragment : BaseContentFragmentAbstract() {
 
                 // 1.5. ОБРАБОТКА КЛИКА -> Получаем результат клика во фрагменте (описываем нашу анонимную функцию из RecyclerView)
                 // Инициализация адаптера
-                favouiteListAdapter = FavouiteListAdapter(
-                    viewModel.radioStationFavouriteListLiveData.value ?: listOf(),
-                    { radioStationFavouriteOnClick ->
-                        Log.d(TAG, "Выбранный элемент списка: $radioStationFavouriteOnClick")
-                        // Открываем по клику другой фрагмент, передаём туда нашу радиостанцию
-                        val direction =
-                            FavouriteListFragmentDirections.actionFavouriteListFragmentToHomeRadioFragment(
-                                radioStationFavouriteOnClick
+                val favouriteStationList = viewModel.radioStationFavouriteListLiveData.value
+
+                if (favouriteStationList != null && favouriteStationList.isNotEmpty()) {
+
+                    favouiteListAdapter = FavouiteListAdapter(
+                        favouriteStationList,
+                        { radioStationFavouriteOnClick ->
+                            Log.d(TAG, "Выбранный элемент списка: $radioStationFavouriteOnClick")
+                            // Открываем по клику другой фрагмент, передаём туда нашу радиостанцию
+                            val direction =
+                                FavouriteListFragmentDirections.actionFavouriteListFragmentToHomeRadioFragment(
+                                    radioStationFavouriteOnClick
+                                )
+                            this.findNavController().navigate(direction)
+                        },
+                        { radioStationFavouriteOnStarClick ->
+                            Log.d(
+                                TAG,
+                                "Выбранный элемент списка: $radioStationFavouriteOnStarClick"
                             )
-                        this.findNavController().navigate(direction)
-                    },
-                    { radioStationFavouriteOnStarClick ->
-                        Log.d(
-                            TAG,
-                            "Выбранный элемент списка: $radioStationFavouriteOnStarClick"
-                        )
-                        // По клику нужно добавить либо удалить из избранного, предварительно проверив наличие радиостанции в базе
-                        viewModel.checkIsStationInFavouritesAndChangeTheStar(
-                            radioStationFavouriteOnStarClick
-                        )
-                    })
+                            // По клику нужно добавить либо удалить из избранного, предварительно проверив наличие радиостанции в базе
+                            viewModel.checkIsStationInFavouritesAndChangeTheStar(
+                                radioStationFavouriteOnStarClick
+                            )
+                        })
 
-                recyclerViewRadioStationList.adapter = favouiteListAdapter
+                    recyclerViewRadioStationList.adapter = favouiteListAdapter
 
-                val animator: DefaultItemAnimator = object : DefaultItemAnimator() {
-                    override fun canReuseUpdatedViewHolder(viewHolder: RecyclerView.ViewHolder): Boolean {
-                        return true
+                    val animator: DefaultItemAnimator = object : DefaultItemAnimator() {
+                        override fun canReuseUpdatedViewHolder(viewHolder: RecyclerView.ViewHolder): Boolean {
+                            return true
+                        }
                     }
+                    recyclerViewRadioStationList.itemAnimator = animator
+
+                } else {
+                    textFavouritesEmpty.isVisible = true
+                    hideProgress()
+                    return@observe
                 }
-                recyclerViewRadioStationList.itemAnimator = animator
 
                 Log.d(
                     TAG,

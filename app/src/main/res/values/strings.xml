@@ -43,4 +43,5 @@
     <string name="foregroundNotification_failedDescription">Please, try turn on and then turn off airplane mode. And then restart the program, if needed.</string>
 
     <string name="favouriteRadioStationList_title">My favourites:</string>
+    <string name="favouriteRadioStationList_empty">It\'s empty here. Try adding stars to your favourite stations.</string>
 </resources>
