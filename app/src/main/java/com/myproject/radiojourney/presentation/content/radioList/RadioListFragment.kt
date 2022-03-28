@@ -4,20 +4,20 @@ import android.app.Dialog
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import android.widget.FrameLayout
-import android.widget.ProgressBar
-import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.RecyclerView
 import com.myproject.radiojourney.IAppSettings
 import com.myproject.radiojourney.R
+import com.myproject.radiojourney.databinding.LayoutRadioStationListBinding
 import com.myproject.radiojourney.model.presentation.RadioStationPresentation
 import com.myproject.radiojourney.presentation.content.base.BaseContentFragmentAbstract
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
+/**
+ * Страница со списком радиостанций по конкретной стране
+ */
 @AndroidEntryPoint
 class RadioListFragment : BaseContentFragmentAbstract() {
     companion object {
@@ -27,16 +27,14 @@ class RadioListFragment : BaseContentFragmentAbstract() {
     @Inject
     lateinit var appSettings: IAppSettings
 
+    // VIEW BINDING -> 1. Объявляем переменную. This property is only valid between onCreateView and onDestroyView
+    private var binding: LayoutRadioStationListBinding? = null
+
     private val viewModel by viewModels<RadioListViewModel>()
     private lateinit var dialogInternetTrouble: Dialog
-    private lateinit var frameLayout: FrameLayout
-    private lateinit var progressCircular: ProgressBar
     private lateinit var countryCode: String
     private lateinit var countryName: String
-    private lateinit var textRadioStationCity: AppCompatTextView
-    private lateinit var radioStationListRecyclerView: RecyclerView
-    private lateinit var radioStationListAdapter: RadioListAdapter
-    private var radioStationList = listOf<RadioStationPresentation>(
+    private var radioStationList = listOf(
         RadioStationPresentation("Test", "test", 2, "test", false)
     )
 
@@ -45,19 +43,19 @@ class RadioListFragment : BaseContentFragmentAbstract() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        // VIEW BINDING -> 2. Инициализация
+        binding = LayoutRadioStationListBinding.inflate(inflater, container, false)
         // TOOLBAR
         setHasOptionsMenu(true)
-        val view = inflater.inflate(R.layout.layout_radio_station_list, container, false)
         // TOOLBAR - где будет находиться в нашем layout
-        appSettings.setToolbar(view?.findViewById(R.id.home_toolbar))
-        return view
+        binding?.let {
+            appSettings.setToolbar(it.homeToolbar)
+        }
+        return binding?.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // Переменные для отображения прогресса
-        frameLayout = view.findViewById(R.id.frameLayout)
-        progressCircular = view.findViewById(R.id.progressCircular)
 
         // Получаем результат с предыдущей страницы
         arguments?.getString("country_code")?.let { country_code_string ->
@@ -65,9 +63,7 @@ class RadioListFragment : BaseContentFragmentAbstract() {
             countryCode = resultArray[0]
             countryName = resultArray[1]
         }
-        textRadioStationCity = view.findViewById(R.id.text_radioStationDialogCity)
-        textRadioStationCity.text = countryName
-        radioStationListRecyclerView = view.findViewById(R.id.recyclerView_radioStationList)
+        binding?.textRadioStationDialogCity?.text = countryName
 
         // Получаем список радиостанций, преобразуем. Сохранять в Room не будем. Радиостанций очень много, будет занимать много места на телефоне.
         // Кроме того, списки на сервере постоянно обновляются. Возможно какой-то радиостанции в списке уже не будет, а в локальной БД она ещё осталась. Пользователь выберет её и будет ошибка.
@@ -99,7 +95,7 @@ class RadioListFragment : BaseContentFragmentAbstract() {
                 showProgress()
 
                 // 1.5. ОБРАБОТКА КЛИКА -> Получаем результат клика во фрагменте (описываем нашу анонимную функцию из RecyclerView)
-                radioStationListRecyclerView.adapter =
+                binding?.recyclerViewRadioStationList?.adapter =
                     RadioListAdapter(radioStationList) { radioStationPresentationOnClick ->
                         Log.d(TAG, "Выбранный элемент списка: $radioStationPresentationOnClick")
                         // Открываем по клику другой фрагмент, передаём туда нашу радиостанцию
@@ -120,13 +116,13 @@ class RadioListFragment : BaseContentFragmentAbstract() {
     }
 
     private fun showProgress() {
-        frameLayout.isVisible = true
-        progressCircular.isVisible = true
+        binding?.frameLayout?.isVisible = true
+        binding?.progressCircular?.isVisible = true
     }
 
     private fun hideProgress() {
-        frameLayout.isVisible = false
-        progressCircular.isVisible = false
+        binding?.frameLayout?.isVisible = false
+        binding?.progressCircular?.isVisible = false
     }
 
     // TOOLBAR
@@ -154,5 +150,11 @@ class RadioListFragment : BaseContentFragmentAbstract() {
     override fun onLogOut() {
         viewModel.logout()
         this.findNavController().navigate(R.id.action_radioListFragment_to_auth_nav_graph)
+    }
+
+    // VIEW BINDING -> 3. onDestroyView()
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding = null
     }
 }

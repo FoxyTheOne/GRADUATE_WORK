@@ -14,8 +14,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.*
-import androidx.appcompat.widget.AppCompatImageView
-import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
@@ -35,10 +33,9 @@ import javax.inject.Inject
 import com.myproject.radiojourney.model.presentation.CountryPresentation
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener
 import com.myproject.radiojourney.model.presentation.RadioStationPresentation
 import android.widget.Toast
-import androidx.appcompat.widget.AppCompatButton
+import com.myproject.radiojourney.databinding.LayoutHomeRadioBinding
 import com.myproject.radiojourney.model.presentation.RadioStationFavouritePresentation
 import kotlinx.coroutines.*
 import java.io.IOException
@@ -47,8 +44,6 @@ import java.lang.Exception
 /**
  * Главная страница.
  * Содержит карту с метками, описание выбранной радиостанции и кнопки "добавить в избранное", "перейти в мой список".
- *
- * С View binding не работает обработка клика Toolbar?
  *
  * В этом фрагменте мы будем использовать Location API, а так же google maps
  * LOCATION -> 1.1. Прописать необходимые разрешения в манифесте
@@ -73,26 +68,21 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
 //        const val BROADCAST_INCREMENT_PROGRESS_FINISH = "BROADCAST_INCREMENT_PROGRESS_FINISH"
     }
 
+    // VIEW BINDING -> 1. Объявляем переменную. This property is only valid between onCreateView and onDestroyView
+    private var binding: LayoutHomeRadioBinding? = null
+
     @Inject
     lateinit var appSettings: IAppSettings
 
     private val viewModel by viewModels<HomeRadioViewModel>()
-    private lateinit var frameLayout: FrameLayout
-    private lateinit var progressCircular: ProgressBar
     private lateinit var dialogInternetTrouble: Dialog
-    private lateinit var textRadioStationTitle: AppCompatTextView
-    private lateinit var textLoadingData: AppCompatTextView
-    private lateinit var imagePlay: AppCompatImageView
     private var isPaused = true
-    private lateinit var buttonAddToFavourites: AppCompatButton
-    private lateinit var buttonGoToFavourites: AppCompatButton
-    private lateinit var imageStar: AppCompatImageView
 
     // PLAY URL (MP3), MEDIA PLAYER -> 1. Создаём переменные
     // MediaPlayer – класс, который позволит вам проигрывать аудио/видео файлы с возможностью сделать паузу и перемотать в нужную позицию.
     // MediaPlayer умеет работать с различными источниками, это может быть: путь к файлу (на SD или в инете), адрес потока, Uri или файл из папки res/raw.
-    var mediaPlayer: MediaPlayer? = null
-    var audioManager: AudioManager? = null
+    private var mediaPlayer: MediaPlayer? = null
+    private var audioManager: AudioManager? = null
     private var audioUrl: String = ""
     private var isStationSelected = false
 
@@ -127,40 +117,31 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        // VIEW BINDING -> 2. Инициализация
+        binding = LayoutHomeRadioBinding.inflate(inflater, container, false)
         // TOOLBAR
         setHasOptionsMenu(true)
-        val view = inflater.inflate(R.layout.layout_home_radio, container, false)
         // TOOLBAR - где будет находиться в нашем layout
-        appSettings.setToolbar(view?.findViewById(R.id.home_toolbar))
-        return view
+        binding?.let {
+            appSettings.setToolbar(it.homeToolbar)
+        }
+        return binding?.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        textRadioStationTitle = view.findViewById(R.id.text_radioStationTitle)
-        textLoadingData = view.findViewById(R.id.text_loadingData)
-        imagePlay = view.findViewById(R.id.image_play)
-        imagePlay.setImageResource(R.drawable.play_white)
-        buttonAddToFavourites = view.findViewById(R.id.button_addToFavourites)
-        buttonGoToFavourites = view.findViewById(R.id.button_goToFavourites)
-        imageStar = view.findViewById(R.id.image_star)
-        imageStar.setImageResource(R.drawable.star_transparent)
+        binding?.imagePlay?.setImageResource(R.drawable.play_white)
+        binding?.imageStar?.setImageResource(R.drawable.star_transparent)
 //        progressHorizontal = view.findViewById(R.id.progress_horizontal)
-        // LOCATION -> 1.4. Получим наш FusedLocationProviderClient. Именно он имеет в себе методы, с помощью которых мы можем определить локацию
-        fusedLocationProviderClient =
-            LocationServices.getFusedLocationProviderClient(requireContext())
-        // Переменные для отображения прогресса
-        frameLayout = view.findViewById(R.id.frameLayout)
-        progressCircular = view.findViewById(R.id.progressCircular)
-        // Кнопки на карте
-        buttonZoomPlus = view.findViewById(R.id.button_zoomPlus)
-        buttonZoomMinus = view.findViewById(R.id.button_zoomMinus)
-        buttonYouAreHere = view.findViewById(R.id.button_youAreHere)
 
         // Настройки диалогового окна
         dialogInternetTrouble = Dialog(requireContext())
         // Передайте ссылку на разметку
         dialogInternetTrouble.setContentView(R.layout.layout_internet_trouble_dialog)
+
+        // LOCATION -> 1.4. Получим наш FusedLocationProviderClient. Именно он имеет в себе методы, с помощью которых мы можем определить локацию
+        fusedLocationProviderClient =
+            LocationServices.getFusedLocationProviderClient(requireContext())
 
         // PLAY URL (MP3), MEDIA PLAYER -> 2. Получаем AudioManager
         audioManager = context?.getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -253,7 +234,7 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
         buttonYouAreHere.setOnClickListener {
             getCurrentOrLastLocation()
         }
-        textRadioStationTitle.setOnClickListener {
+        binding?.textRadioStationTitle?.setOnClickListener {
             if (isStationSelected) {
                 if (isPaused) {
                     // Нажали кнопку play
@@ -265,7 +246,7 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
                 }
             }
         }
-        imagePlay.setOnClickListener {
+        binding?.imagePlay?.setOnClickListener {
             if (isStationSelected) {
                 if (isPaused) {
                     // Нажали кнопку play
@@ -277,13 +258,13 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
                 }
             }
         }
-        imageStar.setOnClickListener {
+        binding?.imageStar?.setOnClickListener {
             val currentRadioStation = viewModel.radioStationSavedLiveData.value
             currentRadioStation?.let {
                 viewModel.checkIsStationInFavouritesAndChangeTheStar(it)
             }
         }
-        buttonAddToFavourites.setOnClickListener {
+        binding?.buttonAddToFavourites?.setOnClickListener {
             if (isStationSelected) {
                 val currentRadioStation = viewModel.radioStationSavedLiveData.value
                 currentRadioStation?.let {
@@ -291,7 +272,7 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
                 }
             }
         }
-        buttonGoToFavourites.setOnClickListener {
+        binding?.buttonGoToFavourites?.setOnClickListener {
             // Если нажали, перед переходом нужно остановить музыку
             stopAudio()
 
@@ -314,7 +295,7 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
         viewModel.radioStationSavedLiveData.observe(
             viewLifecycleOwner,
             { radioStationPresentation ->
-                textRadioStationTitle.text = radioStationPresentation.stationName
+                binding?.textRadioStationTitle?.text = radioStationPresentation.stationName
                 audioUrl = radioStationPresentation.url
                 isStationSelected = true
             })
@@ -329,17 +310,17 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
             Toast.makeText(context, "Failure. Something went wrong", Toast.LENGTH_LONG).show()
         })
         viewModel.stationSavedInFavouritesLiveData.observe(viewLifecycleOwner, {
-            imageStar.setImageResource(R.drawable.star)
+            binding?.imageStar?.setImageResource(R.drawable.star)
         })
         viewModel.stationDeletedFromFavouritesLiveData.observe(viewLifecycleOwner, {
-            imageStar.setImageResource(R.drawable.star_transparent)
+            binding?.imageStar?.setImageResource(R.drawable.star_transparent)
         })
     }
 
     private fun subscribeOnFlow() {
         lifecycleScope.launchWhenCreated {
             viewModel.countryListFlow.collect { countryPresentationList ->
-                textLoadingData.isVisible = false
+                binding?.textLoadingData?.isVisible = false
                 countryList =
                     countryPresentationList // Заполним массив для последующей обработки клика
                 showProgress()
@@ -367,7 +348,7 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
 
         // Затем стартуем проигрывание.
         Toast.makeText(context, "Connecting to radio station...", Toast.LENGTH_SHORT).show()
-        imagePlay.setImageResource(R.drawable.pause_white)
+        binding?.imagePlay?.setImageResource(R.drawable.pause_white)
         isPaused = false
 
         try {
@@ -403,18 +384,18 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
                 // А метод prepare работает синхронно. Соотвественно, если хотим прослушать файл из инета, то используем prepareAsync,
                 // иначе наше приложение повесится, т.к. заблокируется основной поток, который обслуживает UI.
                 Log.d(TAG, "PLAY URL (MP3), MEDIA PLAYER -> prepareAsync")
-                setOnPreparedListener(MediaPlayer.OnPreparedListener {
+                setOnPreparedListener {
                     Log.d(TAG, "PLAY URL (MP3), MEDIA PLAYER -> onPrepared")
                     it.start() // Метод start запускает проигрывание
                     Toast.makeText(context, "Audio started playing", Toast.LENGTH_SHORT).show()
-                })
+                }
                 prepareAsync() // might take long! (for buffering, etc)
-                setOnErrorListener(MediaPlayer.OnErrorListener { mp, what, extra ->
+                setOnErrorListener { _, what, extra ->
                     Toast.makeText(context, "Failed to connect.", Toast.LENGTH_SHORT).show()
                     stopAudio()
                     Log.d(TAG, "PLAY URL (MP3), MEDIA PLAYER -> setOnErrorListener $what $extra")
                     true
-                })
+                }
             }
         } catch (e: IOException) {
             e.printStackTrace()
@@ -445,7 +426,7 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
 
     // PLAY URL (MP3), MEDIA PLAYER -> 5. Метод для остановки проигрывания
     private fun stopAudio() {
-        imagePlay.setImageResource(R.drawable.play_white)
+        binding?.imagePlay?.setImageResource(R.drawable.play_white)
         isPaused = true
 
         mediaPlayer?.let {
@@ -457,13 +438,13 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
     }
 
     private fun showProgress() {
-        frameLayout.isVisible = true
-        progressCircular.isVisible = true
+        binding?.frameLayout?.isVisible = true
+        binding?.progressCircular?.isVisible = true
     }
 
     private fun hideProgress() {
-        frameLayout.isVisible = false
-        progressCircular.isVisible = false
+        binding?.frameLayout?.isVisible = false
+        binding?.progressCircular?.isVisible = false
     }
 
     // LOCATION -> 1.5. Создадим метод для получения Current location либо Last location
@@ -586,7 +567,7 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
         // Далее по документации здесь делают некоторые действия, однако мы сделаем их в отдельном методе
 
         // Обработка клика по InfoWindow маркера
-        mMap.setOnInfoWindowClickListener(OnInfoWindowClickListener { marker ->
+        mMap.setOnInfoWindowClickListener { marker ->
             val latLon = marker.position
 
             // Cycle through countryList array
@@ -613,7 +594,7 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
                     ).show()
                 }
             }
-        })
+        }
     }
 
     // TOOLBAR
@@ -644,6 +625,12 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
 
         viewModel.logout()
         this.findNavController().navigate(R.id.action_homeRadioFragment_to_auth_nav_graph)
+    }
+
+    // VIEW BINDING -> 3. onDestroyView()
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding = null
     }
 
     // PLAY URL (MP3), MEDIA PLAYER -> 6. В методе onDestroy обязательно освобождаем ресурсы проигрывателя

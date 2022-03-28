@@ -3,9 +3,6 @@ package com.myproject.radiojourney.presentation.content.favouriteList
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import android.widget.FrameLayout
-import android.widget.ProgressBar
-import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
@@ -17,8 +14,11 @@ import com.myproject.radiojourney.presentation.content.base.BaseContentFragmentA
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import androidx.recyclerview.widget.DefaultItemAnimator
+import com.myproject.radiojourney.databinding.LayoutRadioStationListFavouriteBinding
 
-
+/**
+ * Страница с избранным
+ */
 @AndroidEntryPoint
 class FavouriteListFragment : BaseContentFragmentAbstract() {
     companion object {
@@ -28,34 +28,30 @@ class FavouriteListFragment : BaseContentFragmentAbstract() {
     @Inject
     lateinit var appSettings: IAppSettings
 
+    // VIEW BINDING -> 1. Объявляем переменную. This property is only valid between onCreateView and onDestroyView
+    private var binding: LayoutRadioStationListFavouriteBinding? = null
+
     private val viewModel by viewModels<FavouriteListViewModel>()
-    private lateinit var recyclerViewRadioStationList: RecyclerView
-    private lateinit var frameLayout: FrameLayout
-    private lateinit var progressCircular: ProgressBar
-    private lateinit var favouiteListAdapter: FavouiteListAdapter
-    private lateinit var textFavouritesEmpty: TextView
+    private lateinit var favouriteListAdapter: FavouiteListAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        // VIEW BINDING -> 2. Инициализация
+        binding = LayoutRadioStationListFavouriteBinding.inflate(inflater, container, false)
         // TOOLBAR
         setHasOptionsMenu(true)
-        val view = inflater.inflate(R.layout.layout_radio_station_list_favourite, container, false)
         // TOOLBAR - где будет находиться в нашем layout
-        appSettings.setToolbar(view?.findViewById(R.id.home_toolbar))
-        return view
+        binding?.let {
+            appSettings.setToolbar(it.homeToolbar)
+        }
+        return binding?.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        recyclerViewRadioStationList = view.findViewById(R.id.recyclerView_radioStationList)
-        textFavouritesEmpty = view.findViewById(R.id.text_favouritesEmpty)
-
-        // Переменные для отображения прогресса
-        frameLayout = view.findViewById(R.id.frameLayout)
-        progressCircular = view.findViewById(R.id.progressCircular)
 
         // Получаем список избранного для отображения
         viewModel.getRadioStationFavouriteListAndShow()
@@ -65,8 +61,9 @@ class FavouriteListFragment : BaseContentFragmentAbstract() {
     }
 
     private fun initListeners() {
-        textFavouritesEmpty.setOnClickListener {
-            this.findNavController().navigate(R.id.action_favouriteListFragment_to_homeRadioFragment)
+        binding?.textFavouritesEmpty?.setOnClickListener {
+            this.findNavController()
+                .navigate(R.id.action_favouriteListFragment_to_homeRadioFragment)
         }
     }
 
@@ -99,7 +96,7 @@ class FavouriteListFragment : BaseContentFragmentAbstract() {
 
                 if (favouriteStationList != null && favouriteStationList.isNotEmpty()) {
 
-                    favouiteListAdapter = FavouiteListAdapter(
+                    favouriteListAdapter = FavouiteListAdapter(
                         favouriteStationList,
                         { radioStationFavouriteOnClick ->
                             Log.d(TAG, "Выбранный элемент списка: $radioStationFavouriteOnClick")
@@ -121,17 +118,17 @@ class FavouriteListFragment : BaseContentFragmentAbstract() {
                             )
                         })
 
-                    recyclerViewRadioStationList.adapter = favouiteListAdapter
+                    binding?.recyclerViewRadioStationList?.adapter = favouriteListAdapter
 
                     val animator: DefaultItemAnimator = object : DefaultItemAnimator() {
                         override fun canReuseUpdatedViewHolder(viewHolder: RecyclerView.ViewHolder): Boolean {
                             return true
                         }
                     }
-                    recyclerViewRadioStationList.itemAnimator = animator
+                    binding?.recyclerViewRadioStationList?.itemAnimator = animator
 
                 } else {
-                    textFavouritesEmpty.isVisible = true
+                    binding?.textFavouritesEmpty?.isVisible = true
                     hideProgress()
                     return@observe
                 }
@@ -144,21 +141,21 @@ class FavouriteListFragment : BaseContentFragmentAbstract() {
                 hideProgress()
             })
         viewModel.stationSavedInFavouritesLiveData.observe(viewLifecycleOwner, {
-            recyclerViewRadioStationList.adapter?.notifyDataSetChanged()
+            binding?.recyclerViewRadioStationList?.adapter?.notifyDataSetChanged()
         })
         viewModel.stationDeletedFromFavouritesLiveData.observe(viewLifecycleOwner, {
-            recyclerViewRadioStationList.adapter?.notifyDataSetChanged()
+            binding?.recyclerViewRadioStationList?.adapter?.notifyDataSetChanged()
         })
     }
 
     private fun showProgress() {
-        frameLayout.isVisible = true
-        progressCircular.isVisible = true
+        binding?.frameLayout?.isVisible = true
+        binding?.progressCircular?.isVisible = true
     }
 
     private fun hideProgress() {
-        frameLayout.isVisible = false
-        progressCircular.isVisible = false
+        binding?.frameLayout?.isVisible = false
+        binding?.progressCircular?.isVisible = false
     }
 
     // TOOLBAR
@@ -186,5 +183,11 @@ class FavouriteListFragment : BaseContentFragmentAbstract() {
     override fun onLogOut() {
         viewModel.logout()
         this.findNavController().navigate(R.id.action_favouriteListFragment_to_auth_nav_graph)
+    }
+
+    // VIEW BINDING -> 3. onDestroyView()
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding = null
     }
 }
