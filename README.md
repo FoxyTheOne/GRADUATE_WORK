@@ -1,9 +1,27 @@
 # TMS_GRADUATE_WORK
-It is a repository for preparing graduate work.
+It is a repository for preparing graduate work. I will continue improving the project in private repository.
 
 This source code is free for studying purposes but you are not allowed to copy and use it in other applications (projects).
 
 Created by Alina Piatrova.
+
+------------------
+
+My graduate work is an application for listening to Internet radio stations. I am using API.radio-browser.info which allows you to access to collected internet radio stations from all over the world (https://www.radio-browser.info/). This API is available for free. The author allows to use it in free and commercial software without restrictions.
+
+On the main page you will find a google map with markers, by clicking on which you can see the number of available Internet radio stations in this country. A list of Internet radio stations in the selected country (recycler view) can be opened by clicking on this message and then you can select the radio you are interested in.
+
+By clicking on the radio, the user returns to the main screen and can listen to it if this radio is currently working.
+
+There are Sign up and Sign in screens with minimal checks of data entry. They are implemented just for practice. Before entering the application, you are asked for your location permission.
+
+- The project uses the MVVM architectural pattern and the Clean Architecture concept;
+- Hilt is used here, as well as Navigation component and View Binding;
+- To store small key-value pairs (token for instance), I use Shared preferences;
+- The Room database is used to store marker locations on the map, as well as to store favorite radio stations. You need to wait for the end of caching at the first start. Further the data is taken from the subscription to the local database. User registration is done for practice, so the logged data is also stored in the Room;
+- I use Foreground service to display caching progress in notification;
+- I make all requests to the server, or to the local database from the ViewModel, through Coroutines;
+- For the request to the server, Retrofit2 is used.
 
 ------------------
 
