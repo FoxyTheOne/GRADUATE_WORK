@@ -56,16 +56,6 @@ import java.lang.Exception
 class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
     companion object {
         private const val TAG = "HomeRadioFragment"
-
-//        // Фильтр для нашего Broadcast
-//        const val BROADCAST_UPDATE_CONTENT = "BROADCAST_UPDATE_CONTENT"
-//
-//        // Фильтры для контента:
-//        const val BROADCAST_INCREMENT_PROGRESS_1 = "BROADCAST_INCREMENT_PROGRESS_1"
-//        const val BROADCAST_INCREMENT_PROGRESS_25 = "BROADCAST_INCREMENT_PROGRESS_25"
-//        const val BROADCAST_INCREMENT_PROGRESS_50 = "BROADCAST_INCREMENT_PROGRESS_50"
-//        const val BROADCAST_INCREMENT_PROGRESS_75 = "BROADCAST_INCREMENT_PROGRESS_75"
-//        const val BROADCAST_INCREMENT_PROGRESS_FINISH = "BROADCAST_INCREMENT_PROGRESS_FINISH"
     }
 
     // VIEW BINDING -> 1. Объявляем переменную. This property is only valid between onCreateView and onDestroyView
@@ -96,15 +86,6 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
     private var marker: Marker? = null
     private var customMarkerYouAreHere: Bitmap? = null
     private var customMarkerRadio: Bitmap? = null
-
-    // Кнопки на карте
-    private lateinit var buttonZoomPlus: Button
-    private lateinit var buttonZoomMinus: Button
-    private lateinit var buttonYouAreHere: Button
-
-//    // Для горизонтальной полосы прогресса (данные из broadcast receiver)
-//    private var myBroadcastReceiver: MyBroadcastReceiver? = null
-//    private lateinit var progressHorizontal: ProgressBar
 
     //    // ADD MARKERS TO MAP -> 1. Для примера, сейчас. Потом подгружать список по запросу
 //    private val places: List<Place> = listOf(
@@ -163,13 +144,6 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
             viewModel.getStoredRadioStation()
         }
 
-//        // SEND SIMPLE Int -> 1.3. Зарегистрируем наш BroadcastReceiver и его intent фильтр
-//        myBroadcastReceiver = MyBroadcastReceiver()
-//        requireActivity().registerReceiver(
-//            myBroadcastReceiver,
-//            IntentFilter(BROADCAST_UPDATE_CONTENT)
-//        )
-
         // GOOGLE MAPS -> 2.2. Obtain the SupportMapFragment and get notified when the map is ready to be used.
         // Необходимо найти supportFragmentManager в списке всех фрагментов
         // val mapFragment = requireActivity().supportFragmentManager.findFragmentById(R.id.map) не сработает,т.к. этот метод ищет внутри активити.
@@ -225,13 +199,13 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
 
     private fun initListeners() {
         // Кнопки на карте
-        buttonZoomPlus.setOnClickListener {
+        binding?.buttonZoomPlus?.setOnClickListener {
             mMap.animateCamera(CameraUpdateFactory.zoomIn())
         }
-        buttonZoomMinus.setOnClickListener {
+        binding?.buttonZoomMinus?.setOnClickListener {
             mMap.animateCamera(CameraUpdateFactory.zoomOut())
         }
-        buttonYouAreHere.setOnClickListener {
+        binding?.buttonYouAreHere?.setOnClickListener {
             getCurrentOrLastLocation()
         }
         binding?.textRadioStationTitle?.setOnClickListener {
@@ -639,27 +613,4 @@ class HomeRadioFragment : BaseContentFragmentAbstract(), OnMapReadyCallback {
         releaseMediaPlayer()
         super.onDestroy()
     }
-
-//    inner class MyBroadcastReceiver : BroadcastReceiver() {
-//        override fun onReceive(context: Context?, intent: Intent?) {
-//            progressHorizontal.isVisible = true
-//
-//            val progress1 = intent?.getIntExtra(BROADCAST_INCREMENT_PROGRESS_1, 0) ?: 0
-//            progressHorizontal.incrementProgressBy(progress1)
-//
-//            val progress25 = intent?.getIntExtra(BROADCAST_INCREMENT_PROGRESS_25, 0) ?: 0
-//            progressHorizontal.incrementProgressBy(progress25)
-//
-//            val progress50 = intent?.getIntExtra(BROADCAST_INCREMENT_PROGRESS_50, 0) ?: 0
-//            progressHorizontal.incrementProgressBy(progress50)
-//
-//            val progress75 = intent?.getIntExtra(BROADCAST_INCREMENT_PROGRESS_75, 0) ?: 0
-//            progressHorizontal.incrementProgressBy(progress75)
-//
-//            val progressFinish = intent?.getIntExtra(BROADCAST_INCREMENT_PROGRESS_FINISH, 0) ?: 0
-//            progressHorizontal.incrementProgressBy(progressFinish)
-//
-//            progressHorizontal.isVisible = false
-//        }
-//    }
 }

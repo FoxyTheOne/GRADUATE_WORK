@@ -131,93 +131,78 @@ class ProgressForegroundService @Inject constructor() : Service() {
 
                 // Для отображения прогресса
                 val listSize = countryCodeRemoteList.size
-//                val incrementProgress25 = listSize / 4
-//                val incrementProgress50 = listSize / 2
-//                val incrementProgress75 = listSize / 4 * 3
+                if (listSize > 0) {
 
-                // Преобразуем коды (remote) в читабельные страны (local) с локацией
-                val countryLocalList = mutableListOf<CountryLocal>()
+                    // Преобразуем коды (remote) в читабельные страны (local) с локацией
+                    val countryLocalList = mutableListOf<CountryLocal>()
 
-                val geocoder = Geocoder(context)
-                var addresses = mutableListOf<Address>()
-                var latitude = 0.0
-                var longitude = 0.0
+                    val geocoder = Geocoder(context)
+                    var addresses: MutableList<Address>
+                    var latitude = 0.0
+                    var longitude = 0.0
 
-                var countryCodeRemoteCount = 0
-                countryCodeRemoteList.forEach { countryCodeRemote ->
-                    countryCodeRemoteCount += 1
+                    var countryCodeRemoteCount = 0
+                    countryCodeRemoteList.forEach { countryCodeRemote ->
+                        countryCodeRemoteCount += 1
 
-//                    when (countryCodeRemoteCount) {
-//                        1 -> sendBroadcast(Intent().apply {
-//                            action = HomeRadioFragment.BROADCAST_UPDATE_CONTENT
-//                            putExtra(HomeRadioFragment.BROADCAST_INCREMENT_PROGRESS_1, 1)
-//                        })
-//                        incrementProgress25 -> sendBroadcast(Intent().apply {
-//                            action = HomeRadioFragment.BROADCAST_UPDATE_CONTENT
-//                            putExtra(HomeRadioFragment.BROADCAST_INCREMENT_PROGRESS_25, 25)
-//                        })
-//                        incrementProgress50 -> sendBroadcast(Intent().apply {
-//                            action = HomeRadioFragment.BROADCAST_UPDATE_CONTENT
-//                            putExtra(HomeRadioFragment.BROADCAST_INCREMENT_PROGRESS_50, 50)
-//                        })
-//                        incrementProgress75 -> sendBroadcast(Intent().apply {
-//                            action = HomeRadioFragment.BROADCAST_UPDATE_CONTENT
-//                            putExtra(HomeRadioFragment.BROADCAST_INCREMENT_PROGRESS_75, 75)
-//                        })
-//                        listSize -> sendBroadcast(Intent().apply {
-//                            action = HomeRadioFragment.BROADCAST_UPDATE_CONTENT
-//                            putExtra(HomeRadioFragment.BROADCAST_INCREMENT_PROGRESS_FINISH, 100)
-//                        })
-//                    }
+                        // Узнаем название страны
+                        val loc = Locale("", countryCodeRemote.name)
+                        val countryName = loc.displayName
 
-                    // Узнаем название страны
-                    val loc: Locale = Locale("", countryCodeRemote.name)
-                    val countryName = loc.displayName
+                        // Узнаем местоположение
+                        // В этом месте часто исключение, как будто проблема с интернетом
+                        Log.d(TAG, "Starting geocoder")
 
-                    // Узнаем местоположение
-                    // В этом месте часто исключение, как будто проблема с интернетом
-                    Log.d(TAG, "Starting geocoder")
-
-                    addresses = geocoder.getFromLocationName(countryName, 1)
-                    if (addresses.size > 0) {
-                        latitude = addresses[0].latitude;
-                        longitude = addresses[0].longitude;
-                    }
+                        addresses = geocoder.getFromLocationName(countryName, 1)
+                        if (addresses.size > 0) {
+                            latitude = addresses[0].latitude
+                            longitude = addresses[0].longitude
+                        }
 //                    Log.d(TAG, "результат addresses: $latitude, $longitude")
 
-                    // remote -> local
-                    val countryLocal = CountryLocal.fromRemoteToLocal(
-                        countryCodeRemote,
-                        countryName = countryName,
-                        countryLocation = LatLng(latitude, longitude)
-                    )
-                    countryLocalList.add(countryLocal)
+                        // remote -> local
+                        val countryLocal = CountryLocal.fromRemoteToLocal(
+                            countryCodeRemote,
+                            countryName = countryName,
+                            countryLocation = LatLng(latitude, longitude)
+                        )
+                        countryLocalList.add(countryLocal)
 
-                    Log.d(TAG, "End of geocoding")
+                        Log.d(TAG, "End of geocoding")
 
-                    // Если notificationBuilder != null
-                    notificationBuilder?.let { builder ->
-                        builder
-                            .setContentText("Progress: $countryCodeRemoteCount files")
-                            .setProgress(listSize, countryCodeRemoteCount, false)
-                            .setSound(null)
-                        // 5.3. Передаём notificationManager наш билдер notification
-                        notificationManager.notify(5, builder.build())
+                        // Если notificationBuilder != null
+                        notificationBuilder?.let { builder ->
+                            builder
+                                .setContentText("Progress: $countryCodeRemoteCount files")
+                                .setProgress(listSize, countryCodeRemoteCount, false)
+                                .setSound(null)
+                            // 5.3. Передаём notificationManager наш билдер notification
+                            notificationManager.notify(5, builder.build())
+                        }
                     }
+
+                    Log.d(
+                        TAG,
+                        "Успешное преобразование стран. Получен результат [0]: ${countryLocalList[0]}"
+                    )
+
+                    // Теперь сохраним наши страны в Room
+                    localRadioDataSource.saveCountryList(countryLocalList)
+
+
+                } else {
+                    Log.d(
+                        TAG,
+                        "countryCodeRemoteList size = $listSize. The server is down. Please, try again later"
+                    )
+                    // TODO notification "The server is down. Please, try again later"
                 }
-
-                Log.d(
-                    TAG,
-                    "Успешное преобразование стран. Получен результат [0]: ${countryLocalList[0]}"
-                )
-
-                // Теперь сохраним наши страны в Room
-                localRadioDataSource.saveCountryList(countryLocalList)
 
                 // 5.4. Когда прогресс заканчивается, закрываем Foreground, удаляем уведомления, stop service
                 stopForeground(true)
                 notificationManager.cancelAll()
                 stopSelf()
+
             } catch (e: IOException) {
                 Log.d(
                     TAG,

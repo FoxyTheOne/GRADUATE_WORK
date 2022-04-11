@@ -4,6 +4,7 @@ import com.myproject.radiojourney.model.remote.CountryCodeRemote
 import android.util.Log
 import com.myproject.radiojourney.data.dataSource.network.service.IRadioServiceWrapper
 import com.myproject.radiojourney.model.remote.RadioStationRemote
+import retrofit2.HttpException
 import java.io.IOException
 import java.net.InetAddress
 import java.net.UnknownHostException
@@ -20,47 +21,54 @@ class NetworkRadioDataSource @Inject constructor(
     // API -> Для того, чтобы воспользоваться API радиостанций, нужно выполнить несколько шагов.
     // These steps should be done in your APP or program.
     override suspend fun getCountryCodeList(): List<CountryCodeRemote> {
-        // 1. Get a list of available servers.
-        // Do a DNS-lookup of 'all.api.radio-browser.info'. This gives you a list of all available servers.
-        val listDNSResultArray = updateDNSList()
+        try {
+            // 1. Get a list of available servers.
+            // Do a DNS-lookup of 'all.api.radio-browser.info'. This gives you a list of all available servers.
+            val listDNSResultArray = updateDNSList()
 
-        // 2. Randomize the list and choose the first entry of the now random list. If a request fails just retry the request with the next entry in the list.
-        listDNSResultArray.shuffle()
+            // 2. Randomize the list and choose the first entry of the now random list. If a request fails just retry the request with the next entry in the list.
+            listDNSResultArray.shuffle()
 
-        // Пробуем перебирать сервера
-        var countryCodeRemoteList =
-            listOf<CountryCodeRemote>() // Пустой массив для результата запроса
+            // Пробуем перебирать сервера
+            var countryCodeRemoteList =
+                listOf<CountryCodeRemote>() // Пустой массив для результата запроса
 
-        val resultDNSIterator = listDNSResultArray.iterator()
-        while (resultDNSIterator.hasNext()) {
-            try {
-                val baseURL = "https://${resultDNSIterator.next()}"
-                Log.d(TAG, "результат baseURL = $baseURL")
+            val resultDNSIterator = listDNSResultArray.iterator()
+            while (resultDNSIterator.hasNext()) {
+                try {
+                    val baseURL = "https://${resultDNSIterator.next()}"
+                    Log.d(TAG, "результат baseURL = $baseURL")
 
-                // radioServiceWrapper - обёртка. Инициализируем retrofit и получаем сервис:
-                val radioService = radioServiceWrapper.getRadioService(baseURL)
-                // И затем делаем запрос getCountryCodeList():
-                countryCodeRemoteList = radioService.getCountryCodeList()
+                    // radioServiceWrapper - обёртка. Инициализируем retrofit и получаем сервис:
+                    val radioService = radioServiceWrapper.getRadioService(baseURL)
+                    // И затем делаем запрос getCountryCodeList():
+                    countryCodeRemoteList = radioService.getCountryCodeList()
 
-                countryCodeRemoteList.forEach { result ->
-                    Log.d(TAG, "результат запроса countryCodeRemoteList: $result")
+                    countryCodeRemoteList.forEach { result ->
+                        Log.d(TAG, "результат запроса countryCodeRemoteList: $result")
+                    }
+
+                    if (countryCodeRemoteList != emptyList<String>()) break
+                } catch (e: IOException) {
+                    Log.d(TAG, "Exception: ${e.message}. Problem with the server")
+                    e.printStackTrace()
+                    continue
                 }
-
-                if (countryCodeRemoteList != emptyList<String>()) break
-            } catch (e: IOException) {
-                Log.d(TAG, "Exception: ${e.message}. Problem with the server")
-                continue
             }
-        }
 
-        return countryCodeRemoteList
+            return countryCodeRemoteList
+        } catch (e: HttpException) {
+            Log.d(TAG, "Exception: ${e.message}. The server is down")
+            e.printStackTrace()
+            return listOf()
+        }
     }
 
     /**
      * TODO
      *  Remember the following things:
      *  Send a speaking http agent string (e.g. mycoolapp/1.4)
-     *  Send /json/url requests for every click the user makes, this helps to mark stations as popular and makes the database more usefull to other people.
+     *  Send /json/url requests for every click the user makes, this helps to mark stations as popular and makes the database more useful to other people.
      *  Send feature requests/bugs to github
      */
 
