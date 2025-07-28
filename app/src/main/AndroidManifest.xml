@@ -16,10 +16,20 @@
     Разрешение для Foreground Service:
      -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission
+        android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"
+        android:minSdkVersion="34" />
+    <uses-permission
+        android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+        android:minSdkVersion="34" />
     <!--
         Разрешение для Alert Window:
     -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <!--
+    When targeting Android 13 or higher, posting a permission requires holding the `POST_NOTIFICATIONS` permission:
+-->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".App"
@@ -44,7 +54,10 @@
         <!--
          2. Декларируем Foreground Service:
           -->
-        <service android:name=".utils.service.ProgressForegroundService" />
+        <service
+            android:name=".utils.service.ProgressForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
         <!--
         Google maps:
          -->
