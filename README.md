@@ -54,6 +54,7 @@ A list of Internet radio stations in the selected country (recycler view) **can 
 
 ------------------
 
+<a id="tech-stack"></a>
 ## 🛠️ Tech stack
 - **Kotlin**
 - **Gradle**
@@ -70,6 +71,7 @@ A list of Internet radio stations in the selected country (recycler view) **can 
 
 ------------------
 
+<a id="problems"></a>
 ## ⚙️ Problems
 While using the native android geocoder function to get the location by address - `geocoder.getFromLocationName()`, quite often an exception **«grpc failed»** comes.
 **I will quote** one of the comments on this matter from the site **stackoverflow.com**:  
@@ -101,6 +103,7 @@ This only matters **the first time you launch the program**. With further use, t
 
 ------------------
 
+<a id="о-программе"></a>
 ## 📱 О программе
 Данный проект представляет собой **приложение для прослушивания интернет радиостанций**.  
 
@@ -108,6 +111,7 @@ This only matters **the first time you launch the program**. With further use, t
 
 ------------------
 
+<a id="как-пользоваться-программой"></a>
 ## 🚀 Как пользоваться программой
 Перед входом в приложение для практики реализованы экраны Sign up и Sign in с минимальными проверками правильности ввода данных. **Регистрация пользователя сделана для примера, поэтому регистрируемые данные сохраняются только в Room**
 
@@ -136,6 +140,7 @@ This only matters **the first time you launch the program**. With further use, t
 
 ------------------
 
+<a id="технологический-стек"></a>
 ## 🛠️ Технологический стек
 - **Kotlin**
 - **Gradle** 
@@ -152,6 +157,7 @@ This only matters **the first time you launch the program**. With further use, t
 
 ------------------
 
+<a id="проблемы"></a>
 ## ⚙️ Проблемы
 При использовании функции родного android геокодера для получения местоположения по адресу - `geocoder.getFromLocationName()`, довольно часто приходит исключение **«grpc failed»**.  
 **Процитирую** один из комментариев по этому поводу с сайта **stackoverflow.com**:
