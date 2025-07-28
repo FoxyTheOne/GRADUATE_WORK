@@ -10,8 +10,8 @@ English
 - [📱 About the application](#about-the-application)
 - [🚀 How to use the application](#how-to-use-the-application)
 - [🛠️ Tech stack](#tech-stack)
-- [⚙️ Problems](#problems)
-Russian
+- [⚙️ Problems](#problems)  
+Русский
 - [📱 О программе](#о-программе)
 - [🚀 Как пользоваться программой](#как-пользоваться-программой)
 - [🛠️ Технологический стек](#технологический-стек)
