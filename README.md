@@ -23,11 +23,18 @@ This project is **an application for listening to Internet radio stations**.
 
 I am using **API.radio-browser.info** which allows you to access to collected internet radio stations from all over the world (https://www.radio-browser.info/). This API is available for free. The author allows to use it in free and commercial software without restrictions.
 
+Just a reminder: it's my idea for my graduate project.  
+I came up with the **idea** myself, I drew the **design** myself and I **made this project** myself.  
+**I continue improving this project in other private github repository**.
+
 ------------------
 
 <a id="how-to-use-the-application"></a>
 ## 🚀 How to use the application
-There are Sign up and Sign in screens with minimal checks of data entry. **User registration is done for practice purpose so the logged data is stored just in the Room database**
+To begin with please **write your MAPS_API_KEY in local.properties** file. It is needed for google maps working.  
+How to get a key: `https://developers.google.com/maps/documentation/android-sdk/get-api-key`  
+
+There are Sign up and Sign in screens in project with minimal checks of data entry. **User registration is done for practice purpose so the logged data is stored just in the Room database**
 
 1. First of all **create an account**:  
 <p align="center"> <img src="images/01_click_sign_up.png" alt="Сlick sign up button" width="410"/> </p>  
@@ -109,10 +116,17 @@ This only matters **the first time you launch the program**. With further use, t
 
 Я использую **API.radio-browser.info**, который предоставляет доступ к собранным интернет-радиостанциям со всего мира (https://www.radio-browser.info/). Этот API доступен бесплатно. Автор разрешает его использовать в бесплатном и платном программном обеспечении без ограничений.
 
+Напоминаю, что это моя идея для моего дипломного проекта.  
+Я сама придумала **идею**, сама нарисовала **дизайн** и сама **сделала этот проект**.
+**Я продолжаю работать над этим проектом, улучшая его, в другом приватном github репозитории**.
+
 ------------------
 
 <a id="как-пользоваться-программой"></a>
 ## 🚀 Как пользоваться программой
+Для запуска проекта необходимо **задать переменную MAPS_API_KEY в файле local.properties**. Это необходимо для работы google maps.  
+Как получить ключ: `https://developers.google.com/maps/documentation/android-sdk/get-api-key`  
+
 Перед входом в приложение для практики реализованы экраны Sign up и Sign in с минимальными проверками правильности ввода данных. **Регистрация пользователя сделана для примера, поэтому регистрируемые данные сохраняются только в Room**
 
 1. Для начала **создайте аккаунт**:  
