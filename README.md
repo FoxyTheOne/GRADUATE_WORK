@@ -1,15 +1,17 @@
 # TMS_GRADUATE_WORK
-It is a repository for my graduate work. My graduate work is **an application for listening to Internet radio stations**.
+It is a repository for my graduate work: **an application for listening to Internet radio stations**.
 
 **This source code is free for studying purposes but you are not allowed to copy and use it in other applications (projects).**
 
 Created by Alina Piatrova.
 
 ## Content / Содержание
+English
 - [📱 About the application](#about-the-application)
 - [🚀 How to use the application](#how-to-use-the-application)
 - [🛠️ Tech stack](#tech-stack)
 - [⚙️ Problems](#problems)
+Russian
 - [📱 О программе](#о-программе)
 - [🚀 Как пользоваться программой](#как-пользоваться-программой)
 - [🛠️ Технологический стек](#технологический-стек)
@@ -25,7 +27,7 @@ I am using **API.radio-browser.info** which allows you to access to collected in
 
 Just a reminder: it's my idea for my graduate project.  
 I came up with the **idea** myself, I drew the **design** myself and I **made this project** myself.  
-**I continue improving this project in other private github repository**.
+**I continue improving this project** by myself **in other private github repository** after graduating.
 
 ------------------
 
@@ -117,8 +119,8 @@ This only matters **the first time you launch the program**. With further use, t
 Я использую **API.radio-browser.info**, который предоставляет доступ к собранным интернет-радиостанциям со всего мира (https://www.radio-browser.info/). Этот API доступен бесплатно. Автор разрешает его использовать в бесплатном и платном программном обеспечении без ограничений.
 
 Напоминаю, что это моя идея для моего дипломного проекта.  
-Я сама придумала **идею**, сама нарисовала **дизайн** и сама **сделала этот проект**.
-**Я продолжаю работать над этим проектом, улучшая его, в другом приватном github репозитории**.
+Я сама придумала **идею**, сама нарисовала **дизайн** и сама **сделала этот проект**.  
+**Я продолжаю работать над этим проектом**, улучшая его, **в другом приватном github репозитории**, после защиты и окончания курсов.
 
 ------------------
 
@@ -130,27 +132,27 @@ This only matters **the first time you launch the program**. With further use, t
 Перед входом в приложение для практики реализованы экраны Sign up и Sign in с минимальными проверками правильности ввода данных. **Регистрация пользователя сделана для примера, поэтому регистрируемые данные сохраняются только в Room**
 
 1. Для начала **создайте аккаунт**:  
-<p align="center"> <img src="images/01_click_sign_up.png" alt="Сlick sign up button" width="410"/> </p>  
-<p align="center"> <img src="images/02_create_account.png" alt="Create account" width="410"/> </p>
+<p align="center"> <img src="images/01_click_sign_up_ru.png" alt="Сlick sign up button" width="410"/> </p>  
+<p align="center"> <img src="images/02_create_account_ru.png" alt="Create account" width="410"/> </p>
 
 2. Затем введите только что сохранённый **пароль**, поставьте **галочку** и **войдите** в приложение:  
-<p align="center"> <img src="images/03_write_password_click_sign_in.png" alt="Write password and click sign in button" width="410"/> </p>  
+<p align="center"> <img src="images/03_write_password_click_sign_in_ru.png" alt="Write password and click sign in button" width="410"/> </p>  
 
 3. Перед входом в приложение запрашивается разрешение на **доступ к местоположению**:
-<p align="center"> <img src="images/04_allow_location.png" alt="Allow location" width="410"/> </p>
+<p align="center"> <img src="images/04_allow_location_ru.png" alt="Allow location" width="410"/> </p>
 
 4. **На главной странице** вы найдете google карту с **маркерами**, нажимая на которые можно увидеть количество доступных в этой стране интернет радиостанций.  
 **Нажав на это сообщение, открывается список интернет радиостанций** в выбранной стране (recycler view), где можно выбрать интересующее радио:
-<p align="center"> <img src="images/05_click_on_the_radio_icon.png" alt="Click on the radio icon" width="410"/> </p>  
-<p align="center"> <img src="images/06_click_on_the_radio_stations_list.png" alt="Click on the radio stations list" width="410"/> </p>
+<p align="center"> <img src="images/05_click_on_the_radio_icon_ru.png" alt="Click on the radio icon" width="410"/> </p>  
+<p align="center"> <img src="images/06_click_on_the_radio_stations_list_ru.png" alt="Click on the radio stations list" width="410"/> </p>
 
 5. Выберите радиостанцию из списка и **нажмите на неё**:
-<p align="center"> <img src="images/07_chose_radio_station.png" alt="Chose radio station" width="410"/> </p>
+<p align="center"> <img src="images/07_chose_radio_station_ru.png" alt="Chose radio station" width="410"/> </p>
 
 6. По клику на радио, пользователь **возвращается на главный экран** и может его прослушать, если это радио в данный момент работает.  
 **Нажмите на кнопку для подключения к радиостанции**:
-<p align="center"> <img src="images/08_click_play.png" alt="Click play" width="410"/> </p>  
-<p align="center"> <img src="images/09_enjoy.png" alt="Enjoy" width="410"/> </p>
+<p align="center"> <img src="images/08_click_play_ru.png" alt="Click play" width="410"/> </p>  
+<p align="center"> <img src="images/09_enjoy_ru.png" alt="Enjoy" width="410"/> </p>
 
 ------------------
 
