@@ -11,6 +11,7 @@ English
 - [🚀 How to use the application](#how-to-use-the-application)
 - [🛠️ Tech stack](#tech-stack)
 - [⚙️ Problems](#problems)  
+
 Русский
 - [📱 О программе](#о-программе)
 - [🚀 Как пользоваться программой](#как-пользоваться-программой)
